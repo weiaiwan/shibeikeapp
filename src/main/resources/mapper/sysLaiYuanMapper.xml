@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="mmain.java.com.gbicc.shibeikeapp.dao.sysLaiYuanDao">
+<resultMap id="sysLaiYuan" type="sysLaiYuan">
+		<result property="lyId" column="LY_ID" />
+		<result property="lyName" column="LY_NAME" />
+		<result property="lyDate" column="LY_DATE" />
+	</resultMap>
+<insert id="insertLY" parameterType="map">
+	insert into sys_laiyuan (
+		<if test="lyId !=null and lyId != ''">
+			LY_ID ,
+		</if>
+		<if test="lyName !=null and lyName != ''">
+			LY_NAME ,
+		</if>
+		<if test="lyDate !=null and lyDate != ''">
+			LY_DATE
+		</if>
+		) VALUES (
+		<if test="lyId !=null and lyId != ''">
+			#{lyId, jdbcType=VARCHAR} ,
+		</if>
+		<if test="lyName !=null and lyName != ''">
+			#{lyName, jdbcType=VARCHAR} ,
+		</if>
+		<if test="lyDate !=null and lyDate != ''">
+			#{lyDate, jdbcType=VARCHAR}
+		</if>
+		)
+</insert>
+
+<delete id="deleteLY" parameterType="map">
+	delete from sys_laiyuan where LY_ID=#{lyId}
+</delete>
+
+<select id="selectLY" parameterType="map" resultMap="sysLaiYuan">
+	select * from sys_laiyuan 
+	where LY_ID!=''
+	<if test="lyName !=null and lyName != ''">
+	and LY_NAME like #{lyName, jdbcType=VARCHAR}
+	</if>
+</select>
+
+<select id="selectLYName" resultType="String">
+	select LY_NAME from sys_laiyuan 
+	order by LY_DATE desc
+</select>
+
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.ExamRecordDao">
+	<resultMap id="examRecord" type="ExamRecord">
+		<result property="officeName" column="office_name" />
+		<result property="paperLevel" column="paper_level" />
+		<result property="paperName" column="paper_name" />
+		<result property="paperScore" column="paper_score" />
+		<result property="paperMaker" column="paper_maker" />
+		<result property="makerPhone" column="maker_phone" />
+		<result property="overTime" column="over_time" />
+		<result property="paperType" column="paper_type" />
+		<result property="examNum" column="exam_num" />
+		<result property="paperId" column="paper_id" />
+	</resultMap>
+		<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{rows}
+
+	</sql> -->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+	<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	<select id="getExamRecord" parameterType="map" resultMap="examRecord">
+	<include refid="pageS" />
+		SELECT office_name,paper_level,paper_name,paper_score,paper_type,
+		paper_maker,maker_phone,up.over_time,up.exam_num,up.paper_id
+		    FROM p_paper_tab p ,p_user_paper up
+		    where p.paper_id=up.paper_id and
+		    up.paper_score is not null and
+		    up.user_id=#{userId} order by up.over_time desc
+		<include refid="pageE" />
+	</select>
+	<select id="getCount" parameterType="String" resultType="int">
+		SELECT count(up.user_id)
+	    <![CDATA[
+		    FROM p_paper_tab p ,p_user_paper up
+		    where p.paper_id=up.paper_id and
+		    up.paper_score is not null and
+		    up.user_id=#{id}
+	    ]]>
+	</select>
+	 
+</mapper>
+

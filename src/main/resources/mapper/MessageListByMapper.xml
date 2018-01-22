@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.MessageListDao">
+	<resultMap id="message" type="MessageList">
+		<result property="messageId" column="message_id" />
+		<result property="messageContent" column="message_content" />
+		<result property="valueFlag" column="value_flag" />
+		<result property="sendTime" column="send_time" />
+		<result property="title" column="message_title" />
+		<result property="scanTimes" column="scan_times" />
+		<result property="messageType" column="message_type" />
+	</resultMap>
+			<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN > #{rows}
+
+	</sql> -->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	
+	
+	<!-- 发布（添加）通知公告 -->
+	<insert id="insertMessage" parameterType="MessageList">
+		INSERT INTO message_list(
+		<if test="messageId!=null and messageId != ''">
+			message_id,
+		</if>
+		<if test="messageContent !=null and messageContent != ''">
+			message_content,
+		</if>
+		<if test="valueFlag !=null and valueFlag != ''">
+			value_flag,
+		</if>
+		<if test="sendTime !=null and sendTime != ''">
+			send_time,
+		</if>
+		<if test="title !=null and title != ''">
+			message_title,
+		</if>
+		<if test="scanTimes !=null and scanTimes != ''">
+			scan_times,
+		</if>
+		<if test="messageType !=null and messageType != ''">
+			message_type 
+		</if>
+		) VALUES (
+		<if test="messageId !=null and messageId != ''">
+			#{messageId, jdbcType=VARCHAR},
+		</if>
+		<if test="messageContent !=null and messageContent != ''">
+			#{messageContent, jdbcType=VARCHAR},
+		</if>
+		<if test="valueFlag !=null and valueFlag != ''">
+			#{valueFlag, jdbcType=VARCHAR},
+		</if>
+		<if test="sendTime !=null and sendTime != ''">
+			#{sendTime, jdbcType=VARCHAR},
+		</if>
+		<if test="title !=null and title != ''">
+			#{title, jdbcType=VARCHAR},
+		</if>
+		<if test="scanTimes !=null and scanTimes != ''">
+			#{scanTimes, jdbcType=INTEGER},
+		</if>
+		<if test="messageType !=null and messageType != ''">
+			#{messageType, jdbcType=VARCHAR} 
+		</if>
+		)
+	</insert>
+	<!-- 显示所有通告（查询所有） -->
+	<select id="getAllMessage" parameterType="map" resultMap="message">
+		select * from  message_list order by SEND_TIME
+	</select>
+	
+	<!-- 更新浏览次数 -->
+	<update id="updateMessage" parameterType="String">
+	update message_list set scan_times=scan_times+1 where message_id=#{id}
+	</update>
+	
+	<select id="getMessage" parameterType="map" resultMap="message">
+	<include refid="pageS" />
+		SELECT *
+	    <![CDATA[
+		    FROM message_list 
+		    order by SEND_TIME	DESC 
+	    ]]>
+	   <include refid="pageE" />
+	</select>
+	
+	<select id="getMessage1" resultMap="message">
+		SELECT *
+	    <![CDATA[
+		    FROM message_list 	
+		    order by SEND_TIME	DESC 
+	    ]]>
+	</select>
+	<!-- 查询学习或考试中心的通知公告 -->
+	<select id="getMessage2" resultMap="message" parameterType="map">
+		SELECT *
+		    FROM message_list where message_type=#{messageType}	
+		    order by SEND_TIME	DESC 
+	</select>
+	<!-- 学习或考试中心的通知公告总条数 -->
+	<select id="getCount2"  resultType="int" parameterType="String">
+		select count(*) from  message_list where message_type=#{messageType}	
+	</select>
+	<!-- 总条数 -->
+	<select id="getCount"  resultType="int">
+		select count(*) from  message_list 
+	</select>
+	<!-- 根据id查询 -->
+	<select id="getMessageById"  parameterType="String" resultMap="message">
+		select * from  message_list   where message_id=#{id}
+	</select>
+	<!--删除公告  -->
+	<delete id="deleteById" parameterType="String">
+		DELETE FROM message_list WHERE message_id=#{messageId}
+	</delete>
+	
+	
+</mapper>
+

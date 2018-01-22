@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.CoursewareDao">
+	<resultMap id="coursewareTab" type="CoursewareTab">
+        <result property="coursewareId" column="COURSEWARE_ID"/>
+        <result property="coursewareTitle" column="COURSEWARE_TITLE"/>
+        <result property="coursewareUrl" column="COURSEWARE_URL"/>
+        <result property="chapterId" column="CHAPTER_ID"/>
+        <result property="coursewareState" column="courseware_state"/>
+        <result property="coursewareUfileUrl" column="COURSEWARE_UFILE_URL"/>
+        <!-- <result property="coursewareType" column="COURSEWARE_TYPE"/> -->
+	</resultMap>
+		<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+
+	</sql> -->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	<insert id="AddCour" parameterType="coursewareTab" >
+       insert into sys_courseware_tab (
+			<if test="coursewareTitle !=null and coursewareTitle!=''">
+        	COURSEWARE_TITLE,	
+			</if>
+			<if test="coursewareUrl !=null and coursewareUrl!=''">
+        	COURSEWARE_URL,	
+			</if>
+			<if test="coursewareState !=null and coursewareState!=''">
+        	courseware_state,	
+			</if>
+			<if test="chapterId !=null and chapterId!=''">
+        	CHAPTER_ID,
+			</if>
+			COURSEWARE_ID
+        ) VALUES (
+			<if test="coursewareTitle !=null and coursewareTitle !=''">
+        	#{coursewareTitle, jdbcType=VARCHAR},	
+			</if>
+			<if test="coursewareUrl !=null and coursewareUrl !=''">
+        	#{coursewareUrl, jdbcType=VARCHAR},	
+        	</if>
+        	<if test="coursewareState !=null and coursewareState!=''">
+        	#{coursewareState},	
+			</if>
+        	<if test="chapterId !=null and chapterId !=''">
+        	#{chapterId, jdbcType=VARCHAR},
+			</if>
+			#{coursewareId, jdbcType=VARCHAR}
+        )
+	</insert>
+	<select id="getChapIdCour" parameterType="String" resultMap="coursewareTab">
+		select * from sys_courseware_tab where CHAPTER_ID=#{chapterId}
+	</select>
+	
+	<select id="getUrl" parameterType="String" resultMap="coursewareTab">
+		select * from sys_courseware_tab where COURSEWARE_URL=#{coursewareUrl}
+	</select>
+	
+	 <update id="setUfileUrl" parameterType="map">
+	update
+	sys_courseware_tab
+	set COURSEWARE_UFILE_URL = #{coursewareUfileUrl}
+	where
+		COURSEWARE_URL = #{coursewareUrl}
+	</update> 
+	
+	<delete id="delFuJian" parameterType="String">
+	delete from sys_courseware_tab where COURSEWARE_URL=#{coursewareUrl}
+	</delete>
+	
+	<delete id="delAllFuJian" parameterType="String">
+	delete from sys_courseware_tab where CHAPTER_ID=#{chapterId}
+	</delete>
+	
+	<delete id="delCour" parameterType="String">
+	delete from sys_courseware_tab where COURSEWARE_ID=#{coursewareId}
+	</delete>
+	<!-- 根据章节ID 查询出状态为0 -->
+	<select id="findChapIdCour" parameterType="map" resultMap="coursewareTab">
+	<include refid="pageS" />
+		select * from sys_courseware_tab where CHAPTER_ID=#{CoursewareTab.chapterId} AND courseware_state = 0  
+		<include refid="pageE" />
+	</select>
+	<!--修改状态  -->
+	<update id="updateCourseware" parameterType="String">
+	delete from sys_courseware_tab  WHERE courseware_id=#{coursewareId}
+	</update>
+	<!-- 根据id查询 -->
+	<select id="getCoursewareId" parameterType="String" resultType="CoursewareTab">
+		SELECT * FROM sys_courseware_tab WHERE courseware_id =#{coursewareId}
+	</select>
+	<select id="getChapIdCourCount" parameterType="String" resultType="int">
+		select count(*) from sys_courseware_tab where CHAPTER_ID=#{chapterId}
+	</select>
+	
+	<select id="getFuJianCount" parameterType="String" resultType="int">
+		select count(*) from sys_courseware_tab where COURSEWARE_TITLE=#{coursewareTitle}
+	</select>
+	
+	<!-- 查询峰会视频 -->
+	<select id="getFHMV" resultType="CoursewareTab">
+		SELECT *
+		FROM sys_courseware_tab a, chapter_tab b  
+		WHERE a.CHAPTER_ID=b.CHAPTER_ID and a.COURSEWARE_TITLE like "%.mp4" and b.COURSE_TYPE_NAME="峰会视频"
+	</select>
+</mapper>

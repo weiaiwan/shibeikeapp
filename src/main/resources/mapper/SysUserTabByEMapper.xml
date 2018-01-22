@@ -1,0 +1,723 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SysUserTabDao">
+	<resultMap id="userList" type="SysUserTab">
+        <result property="userId" column="USER_ID"/>
+        <result property="roleId" column="ROLE_ID"/>
+        <result property="roleName" column="ROLE_NAME"/>
+        <result property="loginName" column="LOGINNAME"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="identify" column="IDENTIFY"/>
+        <result property="sex" column="SEX"/>
+        <result property="birthTime" column="BIRTH_TIME"/>
+        <result property="certificate" column="CERTIFICATE"/>
+        <result property="deptCode" column="DEPT_CODE"/>
+        <result property="coding" column="CODING"/>
+        <result property="position" column="POSITION"/>
+        <result property="eamil" column="EAMIL"/>
+        <result property="phone" column="PHONE"/>
+        <result property="landline" column="LANDLINE"/>
+        <result property="culture" column="CULTURE"/>
+        <result property="userState" column="USER_STATE"/>
+        <result property="time" column="TIME"/>
+        <result property="joinProject" column="JOIN_PROJECT"/>
+        <result property="userCode" column="USER_CODE"/>
+        <result property="userPass" column="USER_PASS"/>
+        <result property="sorting" column="sorting"/>
+        <result property="ec_id" column="ec_id"/>
+        <result property="enterpriseName" column="enterpriseName" />
+        <result property="address" column="address" />
+        <result property="postName" column="postName" />
+        <result property="title" column="title" />
+        <result property="within" column="within" />
+        <result property="citybureau" column="citybureau" />
+        <result property="sessionId" column="SESSION_ID" />
+        <result property="wrongCount" column="WRONG_COUNT" />
+        <result property="updatePwdTime" column="UPDATE_PWD_TIME" />
+        <result property="openId" column="OPENID" />
+         <result property="logo" column="LOGO" />
+        <result property="nickName" column="NICKNAME" /> 
+        <!-- 企业分类 -->
+        <association property="category" javaType="EnterpriseCategory">
+			<id property="ec_id" column="ec_id"/>
+			<result property="ec_name" column="ec_name"/>
+		</association>
+		<!-- 所属岗位 -->
+        <collection property="postList" ofType="SysPostTab" >
+        	<id property="postId" column="POST_ID"/>
+	        <result property="postName" column="POST_NAME"/>
+	        <result property="unitCode" column="UNIT_CODE"/>
+	        <result property="unitName" column="UNIT_NAME"/>
+	        <result property="postCode" column="POST_CODE"/>
+	       	<result property="deptName" column="DEPT_NAME"/>
+	       	<result property="deptCode" column="DEPT_CODE"/>
+	        <result property="sections_name" column="SECTIONS_NAME"/>
+	        <result property="sections_code" column="SECTIONS_CODE"/>
+        </collection>
+        <!-- 分管权限 -->
+        <collection property="daList" ofType="DistributionAuth" >
+			<id property="da_id" column="da_id" />
+			<result property="userId" column="userId"/>
+			<result property="sectionName" column="sectionName"/>
+	        <result property="sections_code" column="SECTIONS_CODE"/>
+		</collection>
+	</resultMap>
+	
+	
+	<select id="getUserLoginName" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) from sys_user_tab
+		where
+			LOGINNAME =  #{_parameter} 
+		and USER_STATE="1"
+	</select>
+	
+	
+	
+	<select id="getUserByPost" parameterType="SysPostTab" resultMap="userList">
+		select u.USER_ID,u.USER_NAME from sys_user_tab  u
+		left join user_post_tab  up on u.USER_ID = up.userId
+		left join sys_post_tab  p on up.postId = p.post_id
+		<where> 
+		<if test="unitCode !=null and unitCode != ''">
+			and p.UNIT_CODE = #{unitCode}
+		</if>
+		<if test="sections_code !=null and sections_code != ''">
+			and p.SECTIONS_CODE = #{sections_code}
+		</if>
+		<if test="postCode !=null and postCode != ''">
+			and p.POST_CODE = #{postCode}
+		</if>
+		and u.USER_STATE = 1
+		</where>
+	</select>
+	
+	<!-- useGeneratedKeys="true" keyProperty="xxx" for sqlserver and mysql -->
+	<insert id="insertSysUser" useGeneratedKeys="false" keyProperty="userId" parameterType="SysUserTab">
+        INSERT INTO sys_user_tab (
+			<if test="userId!=null and userId != ''">
+        	USER_ID ,	
+			</if>
+			<if test="roleId !=null and roleId != ''">
+        	ROLE_ID ,	
+			</if>
+			<if test="roleName !=null and roleName != ''">
+        	ROLE_NAME ,	
+			</if>
+			<if test="userName !=null and userName != ''">
+        	USER_NAME ,	
+			</if>
+			<if test="identify !=null and identify != ''">
+        	IDENTIFY ,	
+			</if>
+			<if test="sex !=null and sex != ''">
+        	SEX ,	
+			</if>
+			<if test="birthTime !=null and birthTime != ''">
+        	BIRTH_TIME ,	
+			</if>
+			<if test="certificate !=null and certificate != ''">
+        	CERTIFICATE ,	
+			</if>
+			<if test="enterpriseName !=null and enterpriseName != ''">
+        	enterpriseName ,	
+			</if>
+			<if test="ec_id !=null and ec_id != ''">
+        	ec_id ,	
+			</if>
+			<if test="coding !=null and coding != ''">
+        	CODING ,	
+			</if>
+			<if test="position !=null and position != ''">
+        	POSITION ,	
+			</if>
+			<if test="eamil !=null and eamil != ''">
+        	EAMIL ,	
+			</if>
+			<if test="phone !=null and phone != ''">
+        	PHONE ,	
+			</if>
+			<if test="landline !=null and landline != ''">
+        	LANDLINE ,	
+			</if>
+			<if test="culture !=null and culture != ''">
+        	CULTURE ,	
+			</if>
+        	USER_STATE ,	
+			<if test="time !=null and time != ''">
+        	TIME ,	
+			</if>
+			<if test="joinProject !=null and joinProject != ''">
+        	JOIN_PROJECT ,	
+			</if>
+			<if test="userCode !=null and userCode != ''">
+        	USER_CODE ,	
+			</if>
+			<if test="userPass !=null and userPass != ''">
+        	USER_PASS ,
+			</if>
+			<if test="within !=null and within !=''">
+        	within,
+			</if>
+			<if test="address!=null and address != ''">
+        	address,
+			</if>
+			<if test="title !=null and title != ''">
+        	title,
+			</if>
+			<if test="loginName !=null and loginName != ''">
+        	loginName,
+			</if>
+			<if test="sorting !=null and sorting != ''">
+        	sorting,
+			</if>
+			
+			
+			<if test="openId !=null and openId != ''">
+        	OPENID,
+			</if>
+			<if test="logo !=null and logo != ''">
+        	LOGO,
+			</if>
+			<if test="nickName !=null and nickName != ''">
+        	NICKNAME,
+			</if>
+			
+			<if test="updatePwdTime !=null and updatePwdTime != ''">
+        	UPDATE_PWD_TIME
+			</if>
+        ) VALUES (
+			<if test="userId!=null and userId != ''">
+        	#{userId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="roleId !=null and roleId != ''">
+        	#{roleId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="roleName !=null and roleName != ''">
+        	#{roleName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userName!=null and userName != ''">
+        	#{userName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="identify !=null and identify != ''">
+        	#{identify, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="sex!=null and sex != ''">
+        	#{sex, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="birthTime !=null and birthTime != ''">
+        	#{birthTime, jdbcType=DATE} ,	
+			</if>
+			<if test="certificate !=null and certificate != ''">
+        	#{certificate, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="enterpriseName !=null and enterpriseName != ''">
+        	#{enterpriseName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="ec_id !=null and ec_id != ''">
+        	#{ec_id, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="coding !=null and coding != ''">
+        	#{coding, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="position !=null and position != ''">
+        	#{position, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="eamil!=null and eamil != ''">
+        	#{eamil, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="phone !=null and phone != ''">
+        	#{phone, jdbcType=DECIMAL} ,	
+			</if>
+			<if test="landline!=null and landline != ''">
+        	#{landline, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="culture !=null and culture != ''">
+        	#{culture, jdbcType=VARCHAR} ,	
+			</if>
+        	1,	
+			<if test="time!=null and time != ''">
+        	#{time, jdbcType=DATE} ,	
+			</if>
+			<if test="joinProject !=null and joinProject != ''">
+        	#{joinProject, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userCode !=null and userCode != ''">
+        	#{userCode, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userPass!=null and userPass != ''">
+        	#{userPass, jdbcType=VARCHAR},
+			</if>
+			<if test="within !=null and within != ''">
+        		#{within, jdbcType=BIT},
+			</if>
+			<if test="address !=null and address != ''">
+        		#{address, jdbcType=VARCHAR},
+			</if>
+			<if test="title !=null and title != ''">
+        		#{title, jdbcType=INTEGER},
+			</if>
+			<if test="loginName !=null and loginName != ''">
+        		#{loginName,jdbcType=INTEGER},
+			</if>
+			<if test="sorting !=null and sorting != ''">
+        		#{sorting, jdbcType=INTEGER},
+			</if>
+			
+			<if test="openId !=null and openId != ''">
+        	#{openId, jdbcType=VARCHAR},
+			</if>
+			<if test="logo !=null and logo != ''">
+        	#{logo, jdbcType=VARCHAR},
+			</if>
+			<if test="nickName !=null and nickName != ''">
+        	#{nickName, jdbcType=VARCHAR},
+			</if>
+			
+			<if test="updatePwdTime !=null and updatePwdTime != ''">
+        		#{updatePwdTime, jdbcType=INTEGER}
+			</if>
+        )
+	</insert>
+    
+    <insert id="insertSysUser2" useGeneratedKeys="false" keyProperty="userId" parameterType="SysUserTab">
+        INSERT INTO sys_user_tab (
+			<if test="userId!=null and userId != ''">
+        	USER_ID ,	
+			</if>
+			<if test="roleId !=null and roleId != ''">
+        	ROLE_ID ,	
+			</if>
+			<if test="roleName !=null and roleName != ''">
+        	ROLE_NAME ,	
+			</if>
+			<if test="userName !=null and userName != ''">
+        	USER_NAME ,	
+			</if>
+			<if test="identify !=null and identify != ''">
+        	IDENTIFY ,	
+			</if>
+			<if test="sex !=null and sex != ''">
+        	SEX ,	
+			</if>
+			<if test="birthTime !=null and birthTime != ''">
+        	BIRTH_TIME ,	
+			</if>
+			<if test="certificate !=null and certificate != ''">
+        	CERTIFICATE ,	
+			</if>
+			<if test="enterpriseName !=null and enterpriseName != ''">
+        	enterpriseName ,	
+			</if>
+			<if test="ec_id !=null and ec_id != ''">
+        	ec_id ,	
+			</if>
+			<if test="coding !=null and coding != ''">
+        	CODING ,	
+			</if>
+			<if test="position !=null and position != ''">
+        	POSITION ,	
+			</if>
+			<if test="eamil !=null and eamil != ''">
+        	EAMIL ,	
+			</if>
+			<if test="phone !=null and phone != ''">
+        	PHONE ,	
+			</if>
+			<if test="landline !=null and landline != ''">
+        	LANDLINE ,	
+			</if>
+			<if test="culture !=null and culture != ''">
+        	CULTURE ,	
+			</if>
+        	USER_STATE ,	
+			<if test="time !=null and time != ''">
+        	TIME ,	
+			</if>
+			<if test="joinProject !=null and joinProject != ''">
+        	JOIN_PROJECT ,	
+			</if>
+			<if test="userCode !=null and userCode != ''">
+        	USER_CODE ,	
+			</if>
+			<if test="userPass !=null and userPass != ''">
+        	USER_PASS ,
+			</if>
+			<if test="within !=null and within !=''">
+        	within,
+			</if>
+			<if test="address!=null and address != ''">
+        	address,
+			</if>
+			<if test="title !=null and title != ''">
+        	title,
+			</if>
+			<if test="loginName !=null and loginName != ''">
+        	loginName,
+			</if>
+			<if test="sorting !=null and sorting != ''">
+        	sorting,
+			</if>
+			<if test="wrongCount !=null and wrongCount != ''">
+        	WRONG_COUNT,
+			</if>
+			
+			<if test="openId !=null and openId != ''">
+        	OPENID,
+			</if>
+			<if test="logo !=null and logo != ''">
+        	LOGO,
+			</if>
+			<if test="nickName !=null and nickName != ''">
+        	NICKNAME,
+			</if>
+			
+			<if test="updatePwdTime !=null and updatePwdTime != ''">
+        	UPDATE_PWD_TIME
+			</if>
+        ) VALUES (
+			<if test="userId!=null and userId != ''">
+        	#{userId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="roleId !=null and roleId != ''">
+        	#{roleId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="roleName !=null and roleName != ''">
+        	#{roleName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userName!=null and userName != ''">
+        	#{userName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="identify !=null and identify != ''">
+        	#{identify, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="sex!=null and sex != ''">
+        	#{sex, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="birthTime !=null and birthTime != ''">
+        	#{birthTime, jdbcType=DATE} ,	
+			</if>
+			<if test="certificate !=null and certificate != ''">
+        	#{certificate, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="enterpriseName !=null and enterpriseName != ''">
+        	#{enterpriseName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="ec_id !=null and ec_id != ''">
+        	#{ec_id, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="coding !=null and coding != ''">
+        	#{coding, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="position !=null and position != ''">
+        	#{position, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="eamil!=null and eamil != ''">
+        	#{eamil, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="phone !=null and phone != ''">
+        	#{phone, jdbcType=DECIMAL} ,	
+			</if>
+			<if test="landline!=null and landline != ''">
+        	#{landline, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="culture !=null and culture != ''">
+        	#{culture, jdbcType=VARCHAR} ,	
+			</if>
+        	1,	
+			<if test="time!=null and time != ''">
+        	#{time, jdbcType=DATE} ,	
+			</if>
+			<if test="joinProject !=null and joinProject != ''">
+        	#{joinProject, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userCode !=null and userCode != ''">
+        	#{userCode, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userPass!=null and userPass != ''">
+        	#{userPass, jdbcType=VARCHAR},
+			</if>
+			<if test="within !=null and within != ''">
+        		#{within, jdbcType=BIT},
+			</if>
+			<if test="address !=null and address != ''">
+        		#{address, jdbcType=VARCHAR},
+			</if>
+			<if test="title !=null and title != ''">
+        		#{title, jdbcType=INTEGER},
+			</if>
+			<if test="loginName !=null and loginName != ''">
+        		#{loginName,jdbcType=INTEGER},
+			</if>
+			<if test="sorting !=null and sorting != ''">
+        		#{sorting, jdbcType=INTEGER},
+			</if>
+			<if test="wrongCount !=null and wrongCount != ''">
+        	#{wrongCount, jdbcType=VARCHAR},
+			</if>
+			<if test="openId !=null and openId != ''">
+        	#{openId, jdbcType=VARCHAR},
+			</if>
+			<if test="logo !=null and logo != ''">
+        	#{logo, jdbcType=VARCHAR},
+			</if>
+			<if test="nickName !=null and nickName != ''">
+        	#{nickName, jdbcType=VARCHAR},
+			</if>
+			
+			<if test="updatePwdTime !=null and updatePwdTime != ''">
+        		#{updatePwdTime, jdbcType=INTEGER}
+			</if>
+        )
+	</insert>
+    
+    
+	<update id="updateSysUser" parameterType="SysUserTab" >
+        UPDATE sys_user_tab SET
+        <trim suffixOverrides="," >
+			<if test="roleId !=null and roleId != ''">
+	        ROLE_ID = #{roleId, jdbcType=VARCHAR},
+			</if>
+			<if test="roleName !=null and roleName != ''">
+        	ROLE_NAME = #{roleName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userName !=null and userName != ''">
+	        USER_NAME = #{userName, jdbcType=VARCHAR},
+			</if>
+			<if test="identify!=null and identify != ''">
+	        IDENTIFY = #{identify, jdbcType=VARCHAR},
+			</if>
+			<if test="sex!=null and sex != ''">
+	        SEX = #{sex, jdbcType=VARCHAR},
+			</if>
+			<if test="birthTime !=null and birthTime != ''">
+	        BIRTH_TIME = #{birthTime, jdbcType=DATE},
+			</if>
+			<if test="certificate !=null and certificate != ''">
+	        CERTIFICATE = #{certificate, jdbcType=VARCHAR},
+			</if>
+			<if test="coding !=null and coding != ''">
+	        CODING = #{coding, jdbcType=VARCHAR},
+			</if>
+			<if test="position!=null and position != ''">
+	        POSITION = #{position, jdbcType=VARCHAR},
+			</if>
+			<if test="eamil!=null and eamil != ''">
+	        EAMIL = #{eamil, jdbcType=VARCHAR},
+			</if>
+			<if test="phone!=null and phone != ''">
+	        PHONE = #{phone, jdbcType=DECIMAL},
+			</if>
+			<if test="landline !=null and landline != ''">
+	        LANDLINE = #{landline, jdbcType=VARCHAR},
+			</if>
+			<if test="culture!=null and culture != ''">
+	        CULTURE = #{culture, jdbcType=VARCHAR},
+			</if>
+			<if test="time!=null and time != ''">
+	        TIME = #{time, jdbcType=DATE},
+			</if>
+			<if test="joinProject!=null and joinProject != ''">
+	        JOIN_PROJECT = #{joinProject, jdbcType=VARCHAR},
+			</if>
+			<if test="enterpriseName !=null and enterpriseName != ''">
+	        enterpriseName = #{enterpriseName, jdbcType=VARCHAR},
+			</if>
+			<if test="ec_id !=null and ec_id != ''">
+	        ec_id = #{ec_id, jdbcType=VARCHAR},
+			</if>
+			<if test="userPass !=null and userPass != ''">
+	        USER_PASS = #{userPass, jdbcType=VARCHAR},
+			</if>
+			<if test="address !=null and address != ''">
+	        address = #{address, jdbcType=VARCHAR},
+			</if>
+			<if test="title !=null and title != ''">
+	        title = #{title, jdbcType=VARCHAR},
+			</if>
+			<if test="loginName !=null and loginName != ''">
+	        loginName = #{loginName, jdbcType=VARCHAR},
+			</if>
+			<if test="userCode !=null and userCode != ''">
+        	user_code =#{userCode,jdbcType=INTEGER},
+			</if>			
+			<if test="sorting !=null and sorting != ''">
+        	sorting =#{sorting,jdbcType=INTEGER},
+			</if>
+		</trim>
+        WHERE 
+	        USER_ID = #{userId} 
+	</update>
+	<!-- 逻辑删除 -->
+	<update id="deleteSysUser" parameterType="String">
+		UPDATE sys_user_tab SET USER_STATE = 0 where USER_ID = #{id} 
+	</update>
+	<!-- 物理删除方法
+    <delete id="deleteSysUser" parameterType="String">
+    <![CDATA[
+        DELETE FROM sys_user_tab WHERE
+        USER_ID = #{id} 
+    ]]>
+    </delete> -->
+    
+    <select id="getSysUserById" resultMap="userList" parameterType="String">
+		select u.*,p.* from sys_user_tab u
+		left join user_post_tab  up on u.USER_ID = up.userId
+		left join sys_post_tab  p on up.postId = p.post_id 
+		left join enterprise_category  e on u.ec_id = e.ec_id
+		where u.USER_ID = #{id,jdbcType=VARCHAR} and u.USER_STATE = 1
+	</select>
+	
+	<select id="getMaxSorting" resultType="java.lang.Integer" >
+		select max(sorting) from sys_user_tab
+	</select>
+	<update id="updaateSortingByEdit" parameterType="Integer">
+		update sys_user_tab set Sorting = (Sorting+1) where Sorting >= #{Sorting}
+	</update>
+	<update id="updaateSortingByDel" parameterType="Integer">
+		update sys_user_tab set Sorting = (Sorting-1) where Sorting >= #{Sorting}
+	</update>
+	
+	<update id="reSetPwd" parameterType="SysUserTab" >
+		update sys_user_tab set USER_PASS = #{userPass,jdbcType=VARCHAR}, UPDATE_PWD_TIME = #{updatePwdTime,jdbcType=DATE} where user_id = #{userId,jdbcType=VARCHAR}
+	</update>
+	<update id="updateSession" parameterType="SysUserTab" >
+  		UPDATE  sys_user_tab  SET SESSION_ID=#{sessionId}  WHERE USER_ID = #{userId}
+    </update>
+    <update id="updateSession1" parameterType="string" >
+  		UPDATE  sys_user_tab  SET SESSION_ID=''  WHERE USER_ID = #{userId}
+    </update>
+	
+	<select id="getSysUser" resultMap="userList">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+		select u.enterprisename,u.ec_id,u.user_id,u.role_name,u.role_id,u.user_name,u.identify,u.sex,u.birth_time,u.certificate,u.coding,u.title,
+ u.position,u.eamil,u.phone,u.landline,u.culture,u.user_state,u.time,u.join_project,u.user_code,u.within,u.sorting,u.address,u.user_pass,u.loginname,u.postname,
+ p.POST_ID,p.post_name,d.sections_name sectionName,p.sections_name,p.sections_code,p.unit_code,p.unit_name,p.citybureau,p.post_code,
+ d.da_id,e.ec_name from sys_user_tab  u
+			left join user_post_tab  up on u.USER_ID = up.userId
+			left join sys_post_tab  p on up.postId = p.post_id 
+			left join distributionauth  d on u.user_id =d.userId
+			left join enterprise_category  e on u.ec_id = e.ec_id
+	    	<include refid="condition"/>    
+	    	order by sorting ASC
+	      ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</select>
+	
+	<select id="login" parameterType="SysUserTab" resultMap="userList">
+		select * from sys_user_tab where loginName = #{loginName} AND USER_PASS = #{userPass} and USER_STATE = 1
+	</select>
+	
+	<select id="getCount" resultType="int" parameterType="SysUserTab">
+		select count(u.USER_ID) from sys_user_tab  u
+			left join user_post_tab  up on u.USER_ID = up.userId
+			left join sys_post_tab  p on up.postId = p.post_id 
+			left join distributionauth  d on u.user_id =d.userId
+		<where>
+	       <if test="condition != null">
+	       <if test="condition.citybureau != null and condition.citybureau != ''">
+				AND p.citybureau=#{condition.citybureau}
+			</if>
+			 <if test="condition.roleId != null and condition.roleId != ''">
+				AND u.role_Id like CONCAT(CONCAT('%', #{condition.roleId,jdbcType=VARCHAR}), '%')
+			</if>
+	       <if test="condition.userName != null and condition.userName != ''">
+			 	AND u.USER_NAME like #{condition.userName}
+			</if>
+			<if test="condition.position != null and condition.position != ''">
+			 	AND u.position like #{condition.position}
+			</if>
+			<if test="condition.within !=null">
+        		AND u.within = #{condition.within}	
+			</if>
+		 </if>
+		 <if test="post != null">
+	       <if test="post.unitCode != null and post.unitCode != ''">
+				 AND p.UNIT_CODE = #{post.unitCode}
+			</if>
+			<if test="post.sections_code !=null and post.sections_code != ''">
+        		AND p.SECTIONS_CODE =#{post.sections_code}	
+			</if>
+			<if test="post.postCode !=null and post.postCode != ''">
+        		AND p.post_code=#{condition.postCode}
+			</if>
+		 </if>	
+		 <if test="ec != null">
+	       <if test="ec.ec_id != null and ec.ec_id != ''">
+				AND u.ec_id = #{ec.ec_id}
+			</if>
+		 </if>
+		 and u.USER_STATE = 1
+	     </where>
+	</select>
+
+	<select id="getUserNP" resultMap="userList" parameterType="map">
+		 select ENTERPRISENAME,user_Name,position,user_id from sys_user_tab where user_id in 
+        (select a.userid from
+		 sys_post_tab b join 
+		 user_post_tab a on a.postid = b.post_id 
+         where  b.unit_code=#{unitCode} 
+         <if test="sections_code !=null and sections_code != ''">
+ 		 and b.sections_code= #{sections_code} 
+	     </if>)
+	</select>
+	<!-- 判断用户名是否存在 -->
+	<select id="selectloginName" parameterType="string" resultMap="userList">
+		select * from sys_user_tab where loginName = #{loginName,jdbcType=VARCHAR} and USER_STATE = 1
+	</select>
+	<!-- 根据用户名将错误次数加1 -->
+	<update id="updateWrongCount" parameterType="SysUserTab" >
+  		UPDATE  sys_user_tab  SET WRONG_COUNT=#{wrongCount}  WHERE loginName = #{loginName}
+    </update>
+    <!-- 根据用户名将错误次数变为0 -->
+	<update id="updateWrongCount0" parameterType="SysUserTab" >
+  		UPDATE  sys_user_tab  SET WRONG_COUNT=0  WHERE loginName = #{loginName}
+    </update>
+	<sql id="condition">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>	      		
+		 <if test="condition != null">
+		 
+		  <if test="condition.citybureau != null and condition.citybureau != ''">
+				AND p.citybureau=#{condition.citybureau}
+			</if>
+	       <if test="condition.userName != null and condition.userName != ''">
+				AND u.USER_NAME like #{condition.userName}
+			</if>
+			<if test="condition.position != null and condition.position != ''">
+			 	AND u.position like #{condition.position}
+			</if>
+			<if test="condition.within !=null">
+        		AND within = #{condition.within}	
+			</if> 
+			 <if test="condition.roleId != null and condition.roleId != ''">
+				AND u.role_Id like CONCAT(CONCAT('%', #{condition.roleId,jdbcType=VARCHAR}), '%')
+			</if>
+		 </if>
+		 <if test="post != null">
+	       <if test="post.unitCode != null and post.unitCode != ''">
+				AND p.UNIT_CODE = #{post.unitCode}
+			</if>
+			<if test="post.sections_code !=null and post.sections_code != ''">
+        		AND p.SECTIONS_CODE =#{post.sections_code}	
+			</if>
+			<if test="post.postCode !=null and post.postCode != ''">
+        		AND post_code=#{condition.postCode}
+			</if>
+		 </if>		
+		<if test="ec != null">
+	       <if test="ec.ec_id != null and ec.ec_id != ''">
+				AND u.ec_id = #{ec.ec_id}
+			</if>
+		 </if>
+		 and u.USER_STATE = 1
+		</where>
+        
+	</sql>
+	
+</mapper>
+

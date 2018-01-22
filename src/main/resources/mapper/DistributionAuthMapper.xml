@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.DistributionAuthDao">
+	<resultMap id="dAuthList" type="DistributionAuth">
+		<id property="da_id" column="da_id" />
+        <result property="userId" column="userId"/>
+        <result property="sections_code" column="sections_code"/>
+        <result property="sectionName" column="sectionName"/>
+	</resultMap>
+	<select id="getDAuthByUserID" parameterType="String" resultMap="dAuthList">
+		select da_id,userId,sections_code,sections_name sectionName from distributionauth where userId = #{userId}
+	</select>
+	<delete id="deleteDAuthByUserID" parameterType="String">
+		DELETE FROM distributionauth where userId = #{userId}
+	</delete>
+	<insert id="addDAuth" parameterType="DistributionAuth"  >
+		 INSERT INTO distributionauth (
+		 da_id,
+		 <if test="userId!=null and userId != ''">
+        	userId ,	
+		 </if>
+		 <if test="sections_code!=null and sections_code != ''">
+        	sections_code ,	
+		 </if>
+		 <if test="sectionName!=null and sectionName != ''">
+        	sections_name 
+		 </if>
+        ) VALUES (
+        	#{da_id},
+        <if test="userId!=null and userId != ''">
+        	#{userId, jdbcType=VARCHAR} ,
+		 </if>
+		 <if test="sections_code!=null and sections_code != ''">
+        	#{sections_code, jdbcType=VARCHAR} ,
+		 </if>
+		 <if test="sectionName!=null and sectionName != ''">
+        	#{sectionName, jdbcType=VARCHAR} 	
+		 </if>
+		  )
+	</insert>
+	
+</mapper>
+

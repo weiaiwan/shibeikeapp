@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.ForumDao">
+	<resultMap id="fList" type="Forum">
+		<result property="forumId" column="FORUM_ID" />
+		<result property="forumDesc" column="FORUM_DESC" />
+		<result property="addTime" column="ADD_TIME" />
+		<result property="forumTitle" column="FORUM_TITLE" />
+		<result property="forumPerson" column="FORUM_PERSON" />
+		<result property="userCode" column="USER_CODE" />
+		<result property="chapterCode" column="CHAPTER_CODE" />
+	</resultMap>
+	<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+
+	</sql> -->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+	<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	<!-- 增加论坛-->	
+	<insert id="insertForum" parameterType="Forum">
+		 INSERT INTO forum_tab
+		  <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="forumId !=null and forumId != ''">
+        	FORUM_ID,	
+			</if>
+			<if test="forumDesc !=null and forumDesc != ''">
+			FORUM_DESC,
+			</if>
+			<if test="addTime !=null and addTime != ''">
+        	ADD_TIME,	
+			</if>
+			<if test="forumTitle !=null and forumTitle != ''">
+        	FORUM_TITLE,	
+			</if>
+			<if test="forumPerson !=null and forumPerson != ''">
+        	FORUM_PERSON,	
+			</if>
+			<if test="userCode !=null and userCode != ''">
+        	USER_CODE,	
+			</if>
+			<if test="chapterCode !=null and chapterCode != ''">
+        	CHAPTER_CODE,	
+			</if>
+        	</trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="forumId !=null and forumId != ''">
+        	#{forumId, jdbcType=VARCHAR},	
+			</if>
+			<if test="forumDesc !=null and forumDesc != ''">
+        	#{forumDesc, jdbcType=VARCHAR},	
+			</if>
+			<if test="addTime !=null and addTime != ''">
+        	#{addTime, jdbcType=VARCHAR},	
+			</if>
+			<if test="forumTitle !=null and forumTitle != ''">
+        	 #{forumTitle, jdbcType=VARCHAR},	
+			</if>
+			<if test="forumPerson !=null and forumPerson != ''">
+        	 #{forumPerson, jdbcType=VARCHAR},	
+			</if>
+			<if test="userCode !=null and userCode != ''">
+        	 #{userCode, jdbcType=VARCHAR},	
+			</if>
+			<if test="chapterCode !=null and chapterCode != ''">
+        	 #{chapterCode, jdbcType=VARCHAR},	
+			</if>
+       </trim>
+	</insert>
+	 <!-- 查询出对应课程的所有留言 -->
+ 	 <select id="showForum" parameterType="map" resultMap="fList">
+	    select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+		select* from forum_tab  where chapter_code=#{chapterCode, jdbcType=VARCHAR}
+		order by ADD_TIME desc
+		 ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</select>  
+	 <!-- 查询出对应课程的登录者所有留言 -->
+ 	 <select id="showUserForum" parameterType="map" resultMap="fList">
+	     select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+		select * from forum_tab  where chapter_code=#{chapterCode, jdbcType=VARCHAR}
+		and USER_CODE =#{userCode, jdbcType=VARCHAR} order by ADD_TIME desc
+		 ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</select>  
+	<!--查询出对应课程的登录者所有留言总数 -->
+	 <select id="forumUserCount" parameterType="map" resultType="int">
+		SELECT count(*)
+		    FROM forum_tab where chapter_code=#{chapterCode, jdbcType=VARCHAR} 
+		    and USER_CODE =#{userCode, jdbcType=VARCHAR} 
+	</select>
+	 <!--查询出发布论坛总数 -->
+	 <select id="forumCount" parameterType="map" resultType="int">
+		SELECT count(*)
+		    FROM forum_tab where chapter_code=#{chapterCode, jdbcType=VARCHAR}  
+	</select>
+</mapper>
+

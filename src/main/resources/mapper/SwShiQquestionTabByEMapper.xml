@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SeShiQquestionDao">
+
+	<resultMap id="questionMap" type="QquestionTab">
+        <result property="quesId" column="QUES_ID"/>
+        <result property="quesName" column="QUES_NAME"/>
+        <result property="chapterId" column="CHAPTER_ID"/>
+        <result property="quesType" column="QUES_TYPE"/>
+        <result property="quesAnswer" column="QUES_ANSWER"/>
+        <result property="quesOptions" column="QUES_OPTIONS"/>
+        <result property="quesScore" column="QUES_SCORE"/>
+        <result property="quesSerial" column="QUES_SERIAL"/>
+        <result property="quesExplain" column="QUES_EXPLAIN"/>
+	</resultMap>
+
+	<!-- useGeneratedKeys="true" keyProperty="xxx" for sqlserver and mysql -->
+	<insert id="saveQquestion" parameterType="QquestionTab" >
+       insert into q_question_tab (
+
+        	QUES_ID,	
+			
+			<if test="quesName!=null and quesName!=''">
+        	QUES_NAME,	
+			</if>
+			<if test="chapterId!=null and chapterId!=''">
+        	CHAPTER_ID,	
+			</if>
+			<if test="quesType!=null and quesType!=''">
+        	QUES_TYPE,	
+			</if>
+			<if test="quesAnswer!=null and quesAnswer!=''">
+        	QUES_ANSWER,	
+			</if>
+			<if test="quesOptions!=null and quesOptions!=''">
+        	QUES_OPTIONS,	
+			</if>
+			<if test="quesScore!=null and quesScore!=''">
+        	QUES_SCORE,	
+			</if>
+			<if test="quesSerial!=null and quesSerial!=''">
+        	QUES_SERIAL
+			</if>
+        ) VALUES (
+			<if test="quesId!=null and quesId!=''">
+        	#{quesId, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesName!=null and quesName!=''">
+        	#{quesName, jdbcType=VARCHAR},	
+			</if>
+			<if test="chapterId!=null and chapterId!=''">
+        	#{chapterId, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesType!=null and quesType!=''">
+        	#{quesType, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesAnswer!=null and quesAnswer!=''">
+        	#{quesAnswer, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesOptions!=null and quesOptions!=''">
+        	#{quesOptions, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesScore!=null and quesScore!=''">
+        	#{quesScore, jdbcType=DECIMAL},	
+			</if>
+			<if test="quesSerial!=null and quesSerial!=''">
+        	#{quesSerial, jdbcType=DECIMAL}
+			</if>
+        )
+	</insert>
+    
+
+    
+    <select id="getQquestionId" parameterType="int" resultMap="questionMap">
+     <![CDATA[
+		SELECT * FROM q_question_tab  WHERE QUES_ID = #{id} 
+		  ]]>
+	</select>
+	
+	<select id="getQquestion" parameterType="map" resultMap="questionMap">
+	 <![CDATA[
+		SELECT * FROM q_question_tab
+		     ]]>
+	</select>
+</mapper>
+

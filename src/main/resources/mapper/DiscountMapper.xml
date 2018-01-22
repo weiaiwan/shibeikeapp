@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.DiscountMapper">
+	<resultMap id="BaseResultMap" type="Discount">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="discountCode" property="discountcode" jdbcType="VARCHAR" />
+		<result column="isUse" property="isuse" jdbcType="TINYINT" />
+		<result column="userUse" property="useruse" jdbcType="VARCHAR" />
+		<result column="UseTime" property="usetime" jdbcType="TIMESTAMP" />
+		<result column="discountPrice" property="discountprice"
+			jdbcType="VARCHAR" />
+		<result column="careateTime" property="careatetime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, discountCode, isUse, userUse, UseTime, discountPrice, careateTime
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from discount
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="getDiscountCourCount" resultType="java.lang.Integer">
+		SELECT COUNT(id) from discount a
+		<where>
+			<if test="isUse != null and isUse != '' ">
+				a.isUse = #{isuse,jdbcType=TINYINT}
+			</if>
+		</where>
+	</select>
+
+	<select id="getDiscountCode" resultMap="BaseResultMap"
+		parameterType="map">
+		select
+		<include refid="Base_Column_List" />
+		from discount
+		where discountCode = #{discountcode,jdbcType=VARCHAR}
+	</select>
+	<!-- 分页查询优惠码 -->
+	<select id="getListDiscount" resultMap="BaseResultMap">
+		select * from discount a
+		<where>
+			<if test="isUse != null and isUse != '' ">
+				a.isUse = #{isuse,jdbcType=TINYINT}
+			</if>
+		</where>
+		order by a.careateTime desc 
+		LIMIT  #{pageSize}, #{offset}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from discount
+		where id = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="Discount">
+		insert into discount (id, discountCode, isUse,
+		userUse, UseTime, discountPrice,
+		careateTime)
+		values (#{id,jdbcType=VARCHAR}, #{discountcode,jdbcType=VARCHAR},
+		#{isuse,jdbcType=TINYINT},
+		#{useruse,jdbcType=VARCHAR}, #{usetime,jdbcType=TIMESTAMP}, #{discountprice,jdbcType=VARCHAR},
+		#{careatetime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="Discount">
+		insert into discount
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="discountcode != null">
+				discountCode,
+			</if>
+			<if test="isuse != null">
+				isUse,
+			</if>
+			<if test="useruse != null">
+				userUse,
+			</if>
+			<if test="usetime != null">
+				UseTime,
+			</if>
+			<if test="discountprice != null">
+				discountPrice,
+			</if>
+			<if test="careatetime != null">
+				careateTime,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="discountcode != null">
+				#{discountcode,jdbcType=VARCHAR},
+			</if>
+			<if test="isuse != null">
+				#{isuse,jdbcType=TINYINT},
+			</if>
+			<if test="useruse != null">
+				#{useruse,jdbcType=VARCHAR},
+			</if>
+			<if test="usetime != null">
+				#{usetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="discountprice != null">
+				#{discountprice,jdbcType=VARCHAR},
+			</if>
+			<if test="careatetime != null">
+				#{careatetime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="Discount">
+		update discount
+		<set>
+			<if test="discountcode != null">
+				discountCode = #{discountcode,jdbcType=VARCHAR},
+			</if>
+			<if test="isuse != null">
+				isUse = #{isuse,jdbcType=TINYINT},
+			</if>
+			<if test="useruse != null">
+				userUse = #{useruse,jdbcType=VARCHAR},
+			</if>
+			<if test="usetime != null">
+				UseTime = #{usetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="discountprice != null">
+				discountPrice = #{discountprice,jdbcType=VARCHAR},
+			</if>
+			<if test="careatetime != null">
+				careateTime = #{careatetime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="Discount">
+		update discount
+		set discountCode = #{discountcode,jdbcType=VARCHAR},
+		isUse = #{isuse,jdbcType=TINYINT},
+		userUse = #{useruse,jdbcType=VARCHAR},
+		UseTime = #{usetime,jdbcType=TIMESTAMP},
+		discountPrice = #{discountprice,jdbcType=VARCHAR},
+		careateTime = #{careatetime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

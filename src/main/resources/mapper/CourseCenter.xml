@@ -1,0 +1,2314 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.CourseCenterDao">
+	<resultMap id="chapterTab" type="ChapterTab">
+		<result property="chapterStater" column="CHAPTER_STATER" />
+		<result property="chapterId" column="CHAPTER_ID" />
+		<result property="chapterName" column="CHAPTER_NAME" />
+		<result property="professionalTypeCode" column="PROFESSIONAL_TYPE_CODE" />
+		<result property="professionalName" column="PROFESSIONAL_NAME" />
+		<result property="courseTypeCode" column="COURSE_TYPE_CODE" />
+		<result property="courseName" column="COURSE_NAME" />
+		<result property="chapterNameCode" column="CHAPTER_NAME_CODE" />
+		<result property="classsTime" column="CLASSS_TIME" />
+		<result property="trainer" column="TRAINER" />
+		<result property="trainerPhone" column="TRAINER_PHONE" />
+		<result property="overTime" column="OVER_TIME" />
+		<result property="chapterOffice" column="CHAPTER_OFFICE" />
+		<result property="chapterDescribe" column="CHAPTER_DESCRIBE" />
+		<result property="testWay" column="TEST_WAY" />
+		<result property="postId" column="POST_ID" />
+		<result property="upDate" column="UP_DATE" />
+		<result property="courseTypeName" column="COURSE_TYPE_NAME" />
+		<result property="chapterCode" column="CHAPTER_CODE" />
+		<result property="tableName" column="TABLE_NAME" />
+		<result property="jurisType" column="JURIS_TYPE" />
+	</resultMap>
+	<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN > #{pageSize}
+
+	</sql> -->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	
+	<!-- 查询出所有的处室 -->
+	<select id="showAllSection" resultType="String">
+		SELECT CHAPTER_OFFICE
+	    <![CDATA[
+		    FROM chapter_tab group by CHAPTER_OFFICE 
+	    ]]>
+	</select>
+
+	<!-- 查询出所有的处室和课程数 -->
+	<!-- <select id="showAllSectionAndCourseNum" resultType="java.util.HashMap"> -->
+	<!-- SELECT CHAPTER_OFFICE,count(*) as num -->
+	<!-- <![CDATA[ -->
+	<!-- FROM chapter_tab group by CHAPTER_OFFICE -->
+	<!-- ]]> -->
+	<!-- </select> -->
+
+	<!-- 根据处室查询出所有课程类型 -->
+	<select id="showCourseType" resultType="String" parameterType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE=#{chapterOffice} group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseType" resultType="int" parameterType="String">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE=#{chapterOffice} group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室和课程类型查询出专业类别 -->
+	<select id="showprofessionalName" resultType="String"
+		parameterType="java.util.Map">
+		SELECT PROFESSIONAL_NAME
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE=#{chapterOffice} and COURSE_TYPE_NAME=#{courseTypeName} group by PROFESSIONAL_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室和课程类型查询出专业类别的数量 -->
+	<select id="calprofessionalName" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE=#{chapterOffice} and COURSE_TYPE_NAME=#{courseTypeName} group by PROFESSIONAL_NAME 
+	    ]]>
+	</select>
+	<!-- 根据不同的条件查询课程 -->
+	<select id="showCourse" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%人事处%' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+	    <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		</if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%人事处%' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+	    <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		</if>
+	</select>
+
+	<!-- 根据处室名称查询出所有课程的数量 -->
+	<select id="calCourseByChapterOffice" resultType="int"
+		parameterType="String">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE=#{chapterOffice} 
+	    ]]>
+	</select>
+		
+	<!-- 查询统计监测的 -->
+	<select id="showCourse44" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%统计监测%' and CHAPTER_STATER = '已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			    AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+	    	</if>
+	    	<if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+			</if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse44" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%统计监测%' and CHAPTER_STATER = '已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			    AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			    AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+			</if>
+	</select>
+	
+	<!-- 查询统计规范化建设的 -->
+	<select id="showCourse45" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%统计规范化建设%' and CHAPTER_STATER = '已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+	    	</if>
+	    	<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+	    <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		</if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse45" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%统计规范化建设%' and CHAPTER_STATER = '已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+	</select>
+	
+	<!-- 查询普查调查的 -->
+	<select id="showCourse1" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%普查调查%' and CHAPTER_STATER='已审核' 
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		    </if>
+		    <if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse1" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%普查调查%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+	</select>
+	
+		<!-- 查询法律法规的 -->
+	<select id="showCourse2" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%法律法规%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse2" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%法律法规%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+	</select>
+	
+	
+		<!-- 查询社情民意调查的 -->
+	<select id="showCourse3" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%社情民意调查%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse3" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%社情民意调查%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+	</select>
+	
+		<!-- 查询统计信息化的 -->
+	<select id="showCourse4" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%统计信息化%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse4" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%统计信息化%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		    </if>
+	        <if test="jurisType !=null and jurisType != ''">
+			AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+	</select>
+	
+		<!-- 查询政策法规的 -->
+	<select id="showCourse5" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%政策法规%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="courseName !=null and courseName != ''">
+				AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+	        <if test="jurisType !=null and jurisType != ''">
+		    	AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse5" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%政策法规%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="courseName !=null and courseName != ''">
+				AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+	        <if test="jurisType !=null and jurisType != ''">
+			    AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+	</select>
+	
+		<!-- 查询纪检党务的 -->
+	<select id="showCourse6" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like CONCAT(CONCAT('%', #{courseTypeName}), '%')  and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="courseName !=null and courseName != ''">
+				AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+	        <if test="jurisType !=null and jurisType != ''">
+			    AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		    <if test="tableName !=null and tableName != ''">
+				AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse6" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like CONCAT(CONCAT('%', #{courseTypeName}), '%') 
+		    and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="courseName !=null and courseName != ''">
+				AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+	        <if test="jurisType !=null and jurisType != ''">
+			    AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		    <if test="tableName !=null and tableName != ''">
+				AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+	</select>
+	
+		<!-- 查询统计调研的 -->
+	<select id="showCourse7" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%综合调研%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+		    	AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+				AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+	        <if test="jurisType !=null and jurisType != ''">
+			    AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse7" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%综合调研%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			    AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+				AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+	        <if test="jurisType !=null and jurisType != ''">
+			    AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+	</select>
+	
+		<!-- 查询建模的 -->
+	<select id="showCourse8" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+		    FROM chapter_tab where COURSE_TYPE_NAME like '%统计建模%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			    AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+				AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+	        <if test="jurisType !=null and jurisType != ''">
+			    AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calCourse8" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+		    FROM chapter_tab  where COURSE_TYPE_NAME like '%统计建模%' and CHAPTER_STATER='已审核'
+			<if test="chapterOffice!=null and chapterOffice!=''">
+				AND CHAPTER_OFFICE = #{chapterOffice}
+			</if>
+			<if test="courseTypeName !=null and courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{courseTypeName}
+			</if>
+			<if test="professionalName !=null and professionalName != ''">
+				AND PROFESSIONAL_NAME = #{professionalName}
+			</if>
+			<if test="tableName !=null and tableName != ''">
+			    AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+			</if>
+			<if test="courseName !=null and courseName != ''">
+				AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+			</if>
+	        <if test="jurisType !=null and jurisType != ''">
+			    AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+		    </if>
+	</select>
+	<!-- 监察室 -->
+	<select id="showCourseTypejcs" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%监察室%' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypejcs" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%监察室%' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursejcs" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%监察室%' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+	    <if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursejcs" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%监察室%' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 咨询中心 -->
+	<select id="showCourseTypeld" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%咨询中心%' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypeld" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%咨询中心%' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCourseld" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%咨询中心%' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCourseld" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%咨询中心%' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 教育中心 -->
+	<select id="showCourseTypejyzx" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%教育中心%' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypejyzx" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%教育中心%' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursejyzx" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%教育中心%' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursejyzx" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%教育中心%' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+		<!-- 大数据中心 -->
+	<select id="showCourseTypedsjzrs" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE = '大数据中心' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypedsjzrs" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE = '大数据中心' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursedsjzrs" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE = '大数据中心' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursedsjzrs" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE = '大数据中心' and CHAPTER_STATER='已审核'
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+		<!-- 贸外处 -->
+	<select id="showCourseTypemwc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%贸易外经处%' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypemwc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%贸易外经处%' and CHAPTER_STATER='已审核' group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursemwc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%贸易外经处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursemwc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%贸易外经处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+		<!--大数据中心数据处-->
+	<select id="showCourseTypedsjsjc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%大数据中心数据处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypedsjsjc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%大数据中心数据处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursedsjsjc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%大数据中心数据处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursedsjsjc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%大数据中心数据处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+		<!-- 大数据中心监测处-->
+	<select id="showCourseTypedsjjcc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%大数据中心监测处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypedsjjcc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%大数据中心监测处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursedsjjcc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%大数据中心监测处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursedsjjcc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%大数据中心监测处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+		<!-- 大数据中心运行处 -->
+	<select id="showCourseTypedsjyxc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%大数据中心运行处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypedsjyxc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%大数据中心运行处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursedsjyxc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%大数据中心运行处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursedsjyxc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%大数据中心运行处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+		<!-- 大数据中心应用服务处 -->
+	<select id="showCourseTypedsjyyfw" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%大数据中心应用服务处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypedsjyyfw" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%大数据中心应用服务处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursedsjyyfw" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%大数据中心应用服务处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursedsjyyfw" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%大数据中心应用服务处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+		<!-- 普调中心主任室 -->
+	<select id="showCourseTypepdzrs" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心主任室%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypepdzrs" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心主任室%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursepdzrs" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%普调中心主任室%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursepdzrs" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%普调中心主任室%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+		<!-- 普调中心城乡调查处 -->
+	<select id="showCourseTypepddcc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心城乡调查处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypepddcc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心城乡调查处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursepddcc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%普调中心城乡调查处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursepddcc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%普调中心城乡调查处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		</select>
+		<!-- 普调中心社情民意处 -->
+	<select id="showCourseTypepdsqmyc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心社情民意处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypepdsqmyc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心社情民意处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursepdsqmyc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%普调中心社情民意处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursepdsqmyc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%普调中心社情民意处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+			<!-- 普调中心名录处 -->
+	<select id="showCourseTypepdmlc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心名录处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypepdmlc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心名录处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursepdmlc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%普调中心名录处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursepdmlc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%普调中心名录处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+			<!-- 普调中心普查处 -->
+	<select id="showCourseTypepdpcc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心普查处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypepdpcc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%普调中心普查处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursepdpcc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%普调中心普查处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursepdpcc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%普调中心普查处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+		<!-- 两总师 -->
+	<select id="showCourseTypelzs" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%两总师%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypelzs" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%两总师%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCourselzs" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%两总师%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCourselzs" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%两总师%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 处室下的课程类别 -->
+	<select id="showCourseType1" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%人事处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseType1" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%人事处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	
+	
+	<!-- 2.处室下的课程类别 -->
+	<select id="showCourseTypegh" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%国核处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypegh" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%国核处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursegh" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%国核处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursegh" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%国核处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 3.办公室 -->
+	<select id="showCourseTypebg" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%办公室%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypebg" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%办公室%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursebg" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%办公室%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursebg" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%办公室%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 4.信息中心 -->
+	<select id="showCourseTypexx" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%信息中心%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypexx" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%信息中心%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursexx" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%信息中心%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursexx" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%信息中心%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 5.法规处 -->
+	<select id="showCourseTypefg" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%法规处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypefg" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%法规处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursefg" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%法规处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursefg" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%法规处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 6.设管处 -->
+	<select id="showCourseTypesg" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%设管处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypesg" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%设管处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursesg" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%设管处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursesg" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%设管处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 7.人口处 -->
+	<select id="showCourseTyperk" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%人口处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTyperk" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%人口处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCourserk" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%人口处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCourserk" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%人口处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 8.综合处 -->
+	<select id="showCourseTypezh" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%综合处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypezh" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%综合处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursezh" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%综合处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursezh" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%综合处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 9.农村处 -->
+	<select id="showCourseTypenc" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%农村处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypenc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%农村处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursenc" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%农村处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursenc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%农村处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 10.工业处 -->
+	<select id="showCourseTypegy" resultType="String" parameterType="java.util.Map">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like CONCAT(CONCAT('%', #{chapterOffice,jdbcType=VARCHAR}), '%')
+		     and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypegy" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like CONCAT(CONCAT('%', #{chapterOffice,jdbcType=VARCHAR}), '%')
+		     and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursegy" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		COURSE_NAME,TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like  CONCAT(CONCAT('%', #{chapterOffice,jdbcType=VARCHAR}), '%')
+		 and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName,jdbcType=VARCHAR}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName,jdbcType=VARCHAR}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName,jdbcType=VARCHAR}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType,jdbcType=VARCHAR}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursegy" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like CONCAT(CONCAT('%', #{chapterOffice,jdbcType=VARCHAR}), '%')
+	     and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName,jdbcType=VARCHAR}
+		</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName,jdbcType=VARCHAR}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName,jdbcType=VARCHAR}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType,jdbcType=VARCHAR}), '%')
+	    </if>
+	</select>
+	
+	<!-- 11.能源处 -->
+	<select id="showCourseTypeny" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%能源处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypeny" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%能源处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCourseny" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%能源处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCourseny" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%能源处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 12.投资处 -->
+	<select id="showCourseTypetz" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%投资处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypetz" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%投资处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursetz" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%投资处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursetz" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%投资处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	
+	<!-- 13.调研处-->
+	<select id="showCourseTypedy" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%调研处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypedy" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%调研处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursedy" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%调研处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursedy" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%调研处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!--14.社科处 -->
+	<select id="showCourseTypesk" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%社科处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypesk" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%社科处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursesk" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%社科处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursesk" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%社科处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 15. 服务业处-->
+	<select id="showCourseTypefwy" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%服务业处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<!-- 根据处室查询出课程类型的数量 -->
+	<select id="calCourseTypefwy" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%服务业处%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursefwy" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%服务业处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>	
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>	
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursefwy" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%服务业处%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+	
+	<!-- 16.机关党委 -->
+	<select id="showCourseTypejgdw" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%机关党委%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypejgdw" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE like '%机关党委%' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursejgdw" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		CHAPTER_CODE,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE like '%机关党委%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursejgdw" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE like '%机关党委%' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+		
+	<!-- 普查调查中心 -->
+	<select id="showCourseTypepdzx" resultType="String">
+		SELECT COURSE_TYPE_NAME 
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE = '普查调查中心' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="calCourseTypepdzx" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_OFFICE = '普查调查中心' and CHAPTER_STATER='已审核'  group by COURSE_TYPE_NAME 
+	    ]]>
+	</select>
+	<select id="showCoursepdzx" resultMap="chapterTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT
+		TABLE_NAME,CHAPTER_STATER,CHAPTER_ID,CHAPTER_NAME,PROFESSIONAL_TYPE_CODE,PROFESSIONAL_NAME,COURSE_TYPE_CODE,COURSE_NAME,CHAPTER_NAME_CODE,CLASSS_TIME,TRAINER,TRAINER_PHONE,CHAPTER_OFFICE,CHAPTER_DESCRIBE,TEST_WAY,OVER_TIME,POST_ID,UP_DATE,COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		where  CHAPTER_OFFICE = '普查调查中心'  and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+			<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+		<include refid="pageE" />
+	</select>
+	<select id="calCoursepdzx" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+	    where  CHAPTER_OFFICE = '普查调查中心' and CHAPTER_STATER='已审核' 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			AND COURSE_TYPE_NAME = #{courseTypeName}
+		</if>
+		<if test="tableName !=null and tableName != ''">
+			AND TABLE_NAME like CONCAT(CONCAT('%', #{tableName}), '%')
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			AND COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<if test="jurisType !=null and jurisType != ''">
+	        AND JURIS_TYPE like CONCAT(CONCAT('%', #{jurisType}), '%')
+	    </if>
+	</select>
+</mapper>
+

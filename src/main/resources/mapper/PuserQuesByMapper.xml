@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.PuserQuesDao">
+	<resultMap id="puserQuesTab" type="PuserQuesTab">
+		<id property="scoreId" column="SCORE_ID" />
+		<result property="paperId" column="PAPER_ID" />
+		<result property="userId" column="USER_ID" />
+		<result property="quesId" column="QUES_ID" />
+		<result property="quesType" column="QUES_TYPE" />
+		<result property="userAnswer" column="USER_ANSWER" />
+		<result property="quesScore" column="QUES_SCORE" />
+		<result property="quesRealScore" column="QUES_REAL_SCORE" />
+		<result property="quesAnswer" column="QUES_ANSWER" />
+		<result property="quesSerial" column="QUES_SERIAL" />
+		<result property="type" column="TYPE" />
+		<result property="examNum" column="EXAM_NUM" />
+	 <association property="questionTab" javaType="QquestionTab">
+        <result property="quesId" column="QUES_ID"/>
+        <result property="quesName" column="QUES_NAME"/>
+        <result property="chapterId" column="CHAPTER_ID"/>
+        <result property="quesType" column="QUES_TYPE"/>
+        <result property="quesAnswer" column="QUES_ANSWER"/>
+        <result property="quesOptions" column="QUES_OPTIONS"/>
+        <result property="quesScore" column="QUES_SCORE"/>
+        <result property="quesSerial" column="QUES_SERIAL"/>
+        <result property="quesExplain" column="QUES_EXPLAIN"/>
+	 </association>
+	 </resultMap>
+		<insert id="AddUserQues" parameterType="PuserQuesTab">
+		 INSERT INTO p_user_ques_tab (
+				SCORE_ID,
+				PAPER_ID ,
+				USER_ID ,
+				QUES_ID ,
+				QUES_TYPE,
+				USER_ANSWER,
+				QUES_SCORE,
+				QUES_REAL_SCORE,
+				QUES_ANSWER,
+				EXAM_NUM
+		        ) VALUES (
+      			#{scoreId},
+				#{paperId,jdbcType=VARCHAR} ,
+				#{userId,jdbcType=VARCHAR} ,
+				#{quesId,jdbcType=VARCHAR} ,
+				#{quesType,jdbcType=VARCHAR},
+				#{userAnswer,jdbcType=VARCHAR},
+				#{quesScore},
+				#{quesRealScore},
+				#{quesAnswer,jdbcType=VARCHAR},
+				#{examNum,jdbcType=VARCHAR}
+		  )
+	</insert>
+	<select id="getByUserQues" resultMap="puserQuesTab" parameterType="map">
+		SELECT *
+	    <![CDATA[
+		    FROM p_user_ques_tab
+	    ]]>
+	</select>
+		<select id="getUserQues" resultMap="puserQuesTab" parameterType="map">
+		SELECT *
+	    <![CDATA[
+		    FROM p_user_ques_tab
+	    ]]>
+	</select>
+	<select id="getAnswerisOK" parameterType="map" resultMap="puserQuesTab" >
+		SELECT * FROM p_user_ques_tab
+		 where USER_ID=#{userId} and 
+		 QUES_ID=#{qquestionTab.quesId}
+		 <if test="examNum !=null and examNum !=''">
+		 and EXAM_NUM = #{examNum,jdbcType=VARCHAR}
+		 </if>
+	</select>
+	<select id="getScore" parameterType="map" resultMap="puserQuesTab" >
+		SELECT QUES_REAL_SCORE FROM p_user_ques_tab
+		 where USER_ID=#{userId} and 
+		 PAPER_ID=#{paperId}
+	</select>
+	<select id="getScore1" parameterType="map" resultType="int" >
+		SELECT sum(QUES_REAL_SCORE) FROM p_user_ques_tab
+		 where USER_ID=#{userId} and 
+		 PAPER_ID=#{paperId} and EXAM_NUM = #{examNum,jdbcType=VARCHAR}
+	</select>
+	
+	<update id="updateUserQues" parameterType="SysUserTab" >
+        UPDATE p_user_ques_tab SET
+				PAPER_ID =	#{paperId} ,
+				USER_ID =	#{userId} ,
+				QUES_ID =#{quesId} ,
+				QUES_TYPE=#{quesType},
+				USER_ANSWER=#{userAnswer},
+				QUES_SCORE=#{quesScore},
+				QUES_REAL_SCORE=#{quesRealScore},
+				QUES_ANSWER=#{quesAnswer},
+				EXAM_NUM = #{examNum,jdbcType=VARCHAR}
+        WHERE 
+	        SCORE_ID = #{scoreId}
+	</update>
+	<delete id="delUserQues" parameterType="string">
+	   delete from P_USER_QUES_TAB  where PAPER_ID=#{paperId}
+	</delete>
+	<!-- 删除审核试卷 -->
+	<delete id="delUserQuess" parameterType="java.lang.String" >
+ 		delete from P_USER_QUES_TAB WHERE PAPER_ID = #{_parameter}
+	</delete>
+	<!-- 查看答题之后的正确错误情况 -->
+	<select id="getContion" parameterType="map" resultMap="puserQuesTab" >
+		  select f.*,e.QUES_SERIAL from(
+ 			select d.* from(
+      			select QUES_ID from p_paper_tab a 
+      			join q_paper_question b on a.paper_id=b.paper_id and a.paper_id=#{paperId, jdbcType=VARCHAR}) c 
+      		join q_question_tab d on c.QUES_ID=d.QUES_ID ) e 
+      	  join p_user_ques_tab f on e.QUES_ID=f.ques_id and f.USER_ID=#{userId, jdbcType=VARCHAR} and f.EXAM_NUM = #{examNum,jdbcType=VARCHAR}
+ 		  order by e.ques_type,e.QUES_SERIAL 
+	</select>
+	<!-- 点击“我要交卷”后，判完分后，将所有的type字段值设为1 -->
+	<update id="updateUserType1" parameterType="puserQuesTab" >
+        UPDATE p_user_ques_tab SET TYPE = '1' 
+        WHERE 
+	    USER_ID=#{userId} and 
+	    PAPER_ID=#{paperId} and QUES_ID=#{quesId}
+	</update>
+	<!-- 点击“我要交卷”后，判完分后，将所有的type字段值设为0 -->
+	<update id="updateUserType0" parameterType="puserQuesTab" >
+        UPDATE p_user_ques_tab SET TYPE = '0', QUES_REAL_SCORE='0',USER_ANSWER = null
+        WHERE 
+	    USER_ID=#{userId} and 
+	    PAPER_ID=#{paperId} and QUES_ID=#{quesId}
+	</update>
+		<!-- 获得指定试题-->
+	<select id="getQues" parameterType="map" resultMap="puserQuesTab" >
+		 select * from  p_user_ques_tab where 
+		 USER_ID=#{userId} and 
+	     PAPER_ID=#{paperId} and EXAM_NUM = #{examNum,jdbcType=VARCHAR}
+	</select>
+	<!-- 判断指定用户是否答题 -->
+	<select id="getQuesbyUser" parameterType="map" resultType="int" >
+		 select count(*) from  p_user_ques_tab where 
+		 USER_ID=#{userId,jdbcType=VARCHAR} and 
+	     PAPER_ID=#{paperId,jdbcType=VARCHAR} and QUES_ID=#{quesId,jdbcType=VARCHAR}
+	     and EXAM_NUM = #{examNum,jdbcType=VARCHAR}
+	</select>
+		<!-- 显示成绩页面点击按钮 -->
+	<select id="selectDa" parameterType="map" resultMap="puserQuesTab" >
+		 select * from p_user_ques_tab a join q_question_tab b on a.ques_id = b.ques_id and
+		 a.USER_ID=#{userId,jdbcType=VARCHAR} and 
+	     a.PAPER_ID=#{paperId,jdbcType=VARCHAR} and a.QUES_ID=#{quesId,jdbcType=VARCHAR} and 
+	     a.EXAM_NUM = #{examNum,jdbcType=VARCHAR}
+	</select>
+	</mapper>

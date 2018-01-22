@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SysMenuDao">
+
+	<resultMap id="menuList" type="SysMenuTab">
+        <id property="menuId" column="MENU_ID"/>
+        <result property="menuName" column="MENU_NAME"/>
+        <result property="menuUrl" column="MENU_URL"/>
+        <result property="menuCode" column="MENU_CODE"/>
+        <result property="grade" column="grade"/>
+        <result property="parent_id" column="parent_id"/>
+	</resultMap>
+
+	<insert id="insertMenu" parameterType="SysMenuTab">
+        INSERT INTO sys_menu_tab (MENU_ID,MENU_NAME,MENU_URL,MENU_CODE,grade,parent_id,sorts) VALUES (#{menuId},#{menuName},#{menuUrl},#{menuCode},#{grade},#{parent_id},#{sorts})
+	</insert>
+    
+	<update id="updateMenu" parameterType="SysMenuTab" >
+        UPDATE sys_menu_tab SET
+			<if test="menuName !=null and menuName !=''">
+	        MENU_NAME = #{menuName, jdbcType=VARCHAR},
+			</if>
+			<if test="menuUrl !=null and menuUrl !=''">
+	        MENU_URL = #{menuUrl, jdbcType=VARCHAR},
+			</if>
+			<if test="menuCode !=null and menuCode !=''">
+	        MENU_CODE = #{menuCode, jdbcType=VARCHAR},
+			</if>
+	        parent_id = #{parent_id, jdbcType=VARCHAR},
+	        grade = #{grade, jdbcType=VARCHAR}
+        WHERE 
+	        MENU_ID = #{menuId} 
+	</update>
+
+    <delete id="deleteMenuById" parameterType="String">
+    <![CDATA[
+        DELETE FROM sys_menu_tab WHERE
+        MENU_ID = #{menuId} 
+    ]]>
+    </delete>
+    
+    <select id="getSysMenuById" resultMap="menuList" parameterType="String">
+		SELECT *
+	    <![CDATA[
+		    FROM sys_menu_tab 
+	        WHERE 
+		        MENU_ID = #{menuId,jdbcType=VARCHAR} 
+	    ]]>
+	    order by sorts ASC
+	</select>
+	
+	<select id="getMenuByRoleId" resultMap="menuList" >
+		SELECT * FROM sys_menu_tab 
+		<where>
+			<if test="roleId != null and roleId != '' ">
+				and INSTR((select resources_id from sys_role_tab where role_id = #{roleId}),menu_code) > 0 
+			</if>
+			<if test="menuName != null and menuName != '' ">
+				and MENU_NAME like #{menuName}
+			</if>
+			<if test="parent_id != null and parent_id != '' ">
+				and parent_id = #{parent_id}
+			</if>
+			<if test="(roleId == null || roleId == '') and (menuName == null || menuName == '') and (parent_id == null || parent_id == '')">
+				and grade = 1
+			</if>
+		</where>
+	</select>
+	
+	<select id="getCount" resultType="Integer" >
+		SELECT count(*) FROM sys_menu_tab 
+		<where>
+			<if test="roleId != null and roleId != '' ">
+				and INSTR((select resources_id from sys_role_tab where role_id = #{roleId}),menu_code) > 0 
+			</if>
+			<if test="menuName != null and menuName != '' ">
+				and MENU_NAME like #{menuName}
+			</if>
+			<if test="parent_id != null and parent_id != '' ">
+				and parent_id = #{parent_id}
+			</if>
+			<if test="(roleId == null || roleId == '') and (menuName == null || menuName == '') and (parent_id == null || parent_id == '')">
+				and grade = 1
+			</if>
+		</where>
+	</select>
+	
+	<select id="getParentMenu" resultMap="menuList" parameterType="String">
+		select * from sys_menu_tab 
+		where grade = 1
+		<if test="_parameter != null ">
+			and INSTR((select resources_id from sys_role_tab where role_id = #{_parameter}),menu_code) > 0 
+		</if>
+		order by sorts ASC
+	</select>
+	
+	<select id="getChildMenuById" resultMap="menuList" parameterType="String">
+		select * from sys_menu_tab where parent_id = #{parent_id} order by sorts ASC
+	</select>
+	
+	<select id="getCountByCode" parameterType="String" resultType="Integer" >
+		select count(*) from sys_menu_tab where MENU_CODE = #{code}
+	</select>
+	
+	<select id="getMenuByCode" parameterType="String" resultMap="menuList" >
+		select * from sys_menu_tab where MENU_CODE = #{code} order by sorts ASC
+	</select>
+	
+	<select id="getMenuByRole" parameterType="String" resultMap="menuList">
+	select * from sys_menu_tab 
+		where INSTR((select resources_id from sys_role_tab where role_id = #{_parameter}),menu_code) > 0 
+		order by sorts ASC
+	</select>
+	<select id="getMaxSorts" resultType="Integer">
+		select max(sorts) from sys_menu_tab 
+	</select>
+	<select id="getAll" resultMap="menuList">
+		select * from sys_menu_tab 
+	</select>
+</mapper>
+

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SysBuyDao" >
+  <resultMap id="buyList" type="SysBuy" >
+    <result column="BUY_ID" property="buyId" jdbcType="VARCHAR" />
+    <result column="USER_ID" property="userId" jdbcType="VARCHAR" />
+    <result column="CHAPTER_ID" property="chapterId" jdbcType="VARCHAR" />
+     <result column="UP_DATE" property="update" />
+  </resultMap>
+  
+  <resultMap id="chapterTab" type="ChapterTab">
+		<result property="chapterId" column="CHAPTER_ID" />
+		<result property="chapterNameCode" column="CHAPTER_NAME_CODE" />
+		<result property="chapterName" column="CHAPTER_NAME" />
+		<result property="professionalTypeCode" column="PROFESSIONAL_TYPE_CODE" />
+		<result property="professionalName" column="PROFESSIONAL_NAME" />
+		<result property="courseTypeCode" column="COURSE_TYPE_CODE" />
+		<result property="courseTypeName" column="COURSE_TYPE_NAME" />
+		<result property="courseName" column="COURSE_NAME" />
+		<result property="postId" column="POST_ID" />
+		<result property="classsTime" column="CLASSS_TIME" />
+		<result property="trainer" column="TRAINER" />
+		<result property="trainerPhone" column="TRAINER_PHONE" />
+		<result property="upDate" column="UP_DATE" />
+		<result property="chapterOffice" column="CHAPTER_OFFICE" />
+		<result property="overTime" column="OVER_TIME" />
+		<result property="chapterDescribe" column="CHAPTER_DESCRIBE" />
+		<result property="testWay" column="TEST_WAY" />
+		<result property="chapterStater" column="CHAPTER_STATER" />
+		<result property="trainerUserId" column="TRAINER_USERID" />
+		<result property="upNumber" column="up_number" />
+		<result property="previewNumber" column="PREVIEN_NUMBER" />
+		<result property="chapterCode" column="CHAPTER_CODE" />
+		<result property="userId" column="USER_ID" />
+		<result property="tableName" column="TABLE_NAME" />
+		<result property="jurisType" column="JURIS_TYPE" />
+		<result property="imgName" column="IMG_NAME" />
+		<result property="imgUrl" column="IMG_URL" />
+		<result property="userName" column="USER_NAME" />
+		<result property="chapterStar" column="CHAPTER_STAR" />
+		<result property="chapterBq" column="CHAPTER_BQ" />
+		<result property="price" column="PRICE" />
+	</resultMap>
+  <select id="getBuyCount" resultType="java.lang.Integer" parameterType="map">
+  	SELECT count(*) FROM sys_buy
+  	<where>
+  		<if test="userId != null and userId != ''">
+  			AND USER_ID = #{userId}
+  		</if>
+  		<if test="chapterId != null and chapterId != ''">
+  			AND CHAPTER_ID = #{chapterId}
+  		</if>
+  	</where>
+  </select>
+  <select id="getBuys" resultMap="chapterTab" parameterType="map">
+  	SELECT
+		*
+	FROM
+		chapter_tab
+	WHERE
+		CHAPTER_ID IN (
+			SELECT
+				CHAPTER_ID
+			FROM
+				sys_buy
+			WHERE
+				USER_ID =#{userId}
+			order by UP_DATE desc
+		)
+		
+	<include refid="pages" />
+  </select>
+  
+  <sql id="pages">
+	limit #{start},#{offset}
+	</sql>
+  
+  <select id="getBuysCount" resultType="java.lang.Integer" parameterType="map">
+  	SELECT
+		count(*)
+	FROM
+		chapter_tab
+	WHERE
+		CHAPTER_ID IN (
+			SELECT
+				CHAPTER_ID
+			FROM
+				sys_buy
+			WHERE
+				USER_ID =#{userId}
+		)
+  </select>
+  <insert id="insertBuy" parameterType="map" >
+  	insert into sys_buy (
+		<if test="buyId !=null and buyId != '' ">
+			BUY_ID,
+		</if>
+		<if test="userId !=null and userId != '' ">
+			USER_ID,
+		</if>
+		<if test="chapterId !=null and chapterId != '' ">
+			CHAPTER_ID
+		</if>
+		) VALUES (
+		<if test="buyId !=null and buyId != '' ">
+			#{buyId},
+		</if>
+		<if test="userId !=null and userId != '' ">
+			#{userId},
+		</if>
+		<if test="chapterId !=null and chapterId != '' ">
+			#{chapterId}
+		</if>
+		)
+  </insert>
+  <delete id="deleteBuy" parameterType="map">
+  	delete from sys_buy where USER_ID = #{userId} and CHAPTER_ID = #{chapterId} 
+  </delete>
+</mapper>

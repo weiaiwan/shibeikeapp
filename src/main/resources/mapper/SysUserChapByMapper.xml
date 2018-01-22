@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SysUserChapDao">
+	<resultMap id="sysUserChap" type="SysUserChap">
+		<id property="userChapId" column="user_chap_id" />
+		<result property="userId" column="user_id" />
+		<result property="chapId" column="chap_id" />
+		<result property="userChapType" column="user_chap_type" />
+		<result property="upNumber" column="UP_NUMBER" />
+		<result property="previewNumber" column="PREVIEN_NUMBER" />
+	</resultMap>
+	
+		<insert id="addUserChap" parameterType="sysUserChap">
+			 INSERT INTO sys_user_chap 
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+		<if test="userChapId !=null and userChapId != ''">
+				user_chap_id ,
+			</if>
+			<if test="userId !=null and userId != ''">
+				user_id ,
+			</if>
+			<if test="chapId !=null and chapId != ''">
+				chap_id ,
+			</if>
+			<!-- <if test="userChapType !=null and userChapType != ''">
+				user_chap_type,
+			</if> -->
+ 			<if test="upNumber !=null and upNumber != ''">
+				UP_NUMBER,
+			</if>
+			<if test="previewNumber !=null and previewNumber != ''">
+				PREVIEN_NUMBER
+			</if>
+		      </trim>
+   			 <trim prefix="values (" suffix=")" suffixOverrides=",">
+      		<if test="userChapId !=null and userChapId != ''">
+        	#{userChapId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userId !=null and userId != ''">
+        	#{userId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="chapId !=null and chapId != ''">
+        	#{chapId, jdbcType=VARCHAR} ,	
+			</if>
+		<!-- 	<if test="userChapType !=null and userChapType != ''">
+        	#{userChapType, jdbcType=VARCHAR},
+			</if> -->
+			<if test="upNumber !=null and upNumber != ''">
+			#{upNumber},
+			</if>
+			<if test="previewNumber !=null and previewNumber != ''">
+			#{previewNumber}
+			</if>
+		</trim>
+		</insert>
+		
+		<update id="updateUserChap" parameterType="sysUserChap">
+		UPDATE sys_user_chap SET 
+		up_number=#{upNumber},
+		PREVIEN_NUMBER=#{previewNumber}
+		WHERE chap_id=#{chapId, jdbcType=VARCHAR} 
+	   </update>
+	   
+	   <select id="getChapUser" parameterType="java.util.Map" resultMap="sysUserChap">
+	   		select * from sys_user_chap where chap_id=#{chapId, jdbcType=VARCHAR} and user_id=#{userId, jdbcType=VARCHAR}
+	   </select>
+	</mapper>

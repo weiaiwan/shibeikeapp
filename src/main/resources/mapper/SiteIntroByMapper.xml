@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SiteIntroTabDao">
+	<resultMap id="siteIntro" type="SiteIntroTab">
+		<result property="introid" column="id" />
+		<result property="introContext" column="introducecontext" />
+		<result property="postDate" column="postdate" />
+	</resultMap>
+	<!-- 添加网站内容 （插入表中一条数据） -->
+	<insert id="addSiteIntro">
+		INSERT INTO siteintro (
+		<if test="introid !=null and introid != ''">
+			id ,
+		</if>
+		<if test="introContext !=null and introContext != ''">
+			introducecontext ,
+		</if>
+		<if test="postDate !=null and postDate != ''">
+			postDate ,
+		</if>
+		) VALUES(
+		
+		<if test="introid !=null and introid != ''">
+        	#{introid, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="introContext !=null and introContext != ''">
+        	#{introContext, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="postDate !=null and postDate != ''">
+        	#{postDate, jdbcType=DATE} ,	
+			</if>
+		)
+
+	</insert>
+	<!-- 显示所有网站的描述信息即（历史记录） -->
+	<select id="selectAll" resultType="SiteIntroTab">
+		select * from siteintro order by postdate desc
+	</select>
+	
+	<!-- 查询数据-->
+	<select id="selectOneById" parameterType="java.lang.String" >
+	   select introContext,postDate from siteintro where id= #{introid}
+	</select> 
+
+	<!-- 修改数据 -->
+	<update id="updateContext" parameterType="SiteIntroTab">
+		 UPDATE siteintro SET
+			<if test="introContext !=null and introContext != ''">
+	        introducecontext = #{introContext, jdbcType=VARCHAR},
+			</if>
+			 WHERE 
+	        id = #{introid} 			
+	</update>
+</mapper>
+

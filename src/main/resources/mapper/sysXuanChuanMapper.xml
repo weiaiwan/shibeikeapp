@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.sysXuanChuanDao" >
+  <resultMap id="BaseResultMap" type="sysXuanChuan" >
+    <id column="XC_ID" property="xcId" jdbcType="VARCHAR" />
+    <result column="XC_IMG_URL" property="xcImgUrl" jdbcType="VARCHAR" />
+    <result column="XC_NAME" property="xcName" jdbcType="VARCHAR" />
+    <result column="XC_DATE" property="xcDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="sysXuanChuan" extends="BaseResultMap" >
+    <result column="XC_NEIRONG" property="xcNeirong" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    XC_ID, XC_IMG_URL, XC_NAME, XC_DATE
+  </sql>
+  <sql id="Blob_Column_List" >
+    XC_NEIRONG
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from sys_xuanchuan
+    where XC_ID = #{xcId,jdbcType=VARCHAR}
+  </select>
+  
+   <select id="selectByName" resultMap="ResultMapWithBLOBs" parameterType="map" >
+    select *
+    from sys_xuanchuan
+    where XC_ID != ''
+    <if test="xcName != '' and xcName != null">
+    and XC_NAME like #{xcName}
+    </if>
+    order by XC_DATE desc
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from sys_xuanchuan
+    where XC_ID = #{xcId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="sysXuanChuan" >
+    insert into sys_xuanchuan (XC_ID, XC_IMG_URL, XC_NAME, 
+      XC_DATE, XC_NEIRONG)
+    values (#{xcId,jdbcType=VARCHAR}, #{xcImgUrl,jdbcType=VARCHAR}, #{xcName,jdbcType=VARCHAR}, 
+      #{xcDate,jdbcType=TIMESTAMP}, #{xcNeirong,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="map" >
+    insert into sys_xuanchuan
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="xcId != null" >
+        XC_ID,
+      </if>
+      <if test="xcImgUrl != null" >
+        XC_IMG_URL,
+      </if>
+      <if test="xcName != null" >
+        XC_NAME,
+      </if>
+      <if test="xcDate != null" >
+        XC_DATE,
+      </if>
+      <if test="xcNeirong != null" >
+        XC_NEIRONG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="xcId != null" >
+        #{xcId,jdbcType=VARCHAR},
+      </if>
+      <if test="xcImgUrl != null" >
+        #{xcImgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="xcName != null" >
+        #{xcName,jdbcType=VARCHAR},
+      </if>
+      <if test="xcDate != null" >
+        #{xcDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="xcNeirong != null" >
+        #{xcNeirong,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="map" >
+    update sys_xuanchuan
+    <set >
+      <if test="xcImgUrl != null" >
+        XC_IMG_URL = #{xcImgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="xcName != null" >
+        XC_NAME = #{xcName,jdbcType=VARCHAR},
+      </if>
+      <if test="xcDate != null" >
+        XC_DATE = #{xcDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="xcNeirong != null" >
+        XC_NEIRONG = #{xcNeirong,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where XC_ID = #{xcId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="sysXuanChuan" >
+    update sys_xuanchuan
+    set XC_IMG_URL = #{xcImgUrl,jdbcType=VARCHAR},
+      XC_NAME = #{xcName,jdbcType=VARCHAR},
+      XC_DATE = #{xcDate,jdbcType=TIMESTAMP},
+      XC_NEIRONG = #{xcNeirong,jdbcType=LONGVARCHAR}
+    where XC_ID = #{xcId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="sysXuanChuan" >
+    update sys_xuanchuan
+    set XC_IMG_URL = #{xcImgUrl,jdbcType=VARCHAR},
+      XC_NAME = #{xcName,jdbcType=VARCHAR},
+      XC_DATE = #{xcDate,jdbcType=TIMESTAMP}
+    where XC_ID = #{xcId,jdbcType=VARCHAR}
+  </update>
+</mapper>

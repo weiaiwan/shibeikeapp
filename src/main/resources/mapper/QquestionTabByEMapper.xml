@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.QquestionDao">
+
+	<resultMap id="questionMap" type="QquestionTab">
+        <result property="quesId" column="QUES_ID"/>
+        <result property="quesName" column="QUES_NAME"/>
+        <result property="chapterId" column="CHAPTER_ID"/>
+        <result property="quesType" column="QUES_TYPE"/>
+        <result property="quesAnswer" column="QUES_ANSWER"/>
+        <result property="quesOptions" column="QUES_OPTIONS"/>
+        <result property="quesScore" column="QUES_SCORE"/>
+        <result property="quesSerial" column="QUES_SERIAL"/>
+         <result property="quesExplain" column="QUES_EXPLAIN"/>
+	</resultMap>
+
+<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{page}) c where c.rm >= #{page}
+	</sql>
+	<!-- useGeneratedKeys="true" keyProperty="xxx" for sqlserver and mysql -->
+	<insert id="saveQues" parameterType="QquestionTab" >
+       insert into q_question_tab 
+       <trim prefix="(" suffix=")" suffixOverrides=",">
+        	QUES_ID,	
+			<if test="quesName!=null and quesName!=''">
+        	QUES_NAME,	
+			</if>
+			<if test="chapterId!=null and chapterId!=''">
+        	CHAPTER_ID,	
+			</if>
+			<if test="quesType!=null and quesType!=''">
+        	QUES_TYPE,	
+			</if>
+			<if test="quesAnswer!=null and quesAnswer!=''">
+        	QUES_ANSWER,	
+			</if>
+			<if test="quesOptions!=null and quesOptions!=''">
+        	QUES_OPTIONS,	
+			</if>
+			<if test="quesScore!=null and quesScore!=''">
+        	QUES_SCORE,	
+			</if>
+			<if test="quesSerial!=null and quesSerial!=''">
+        	QUES_SERIAL,
+			</if>
+			<if test="quesExplain!=null and quesExplain!=''">
+        	QUES_EXPLAIN,
+			</if>
+     	 </trim>
+   		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="quesId!=null and quesId!=''">
+        	#{quesId, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesName!=null and quesName!=''">
+        	#{quesName, jdbcType=VARCHAR},	
+			</if>
+			<if test="chapterId!=null and chapterId!=''">
+        	#{chapterId, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesType!=null and quesType!=''">
+        	#{quesType, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesAnswer!=null and quesAnswer!=''">
+        	#{quesAnswer, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesOptions!=null and quesOptions!=''">
+        	#{quesOptions, jdbcType=VARCHAR},	
+			</if>
+			<if test="quesScore!=null and quesScore!=''">
+        	#{quesScore, jdbcType=DECIMAL},	
+			</if>
+			<if test="quesSerial!=null and quesSerial!=''">
+        	#{quesSerial, jdbcType=DECIMAL},
+			</if>
+			<if test="quesExplain!=null and quesExplain!=''">
+        	#{quesExplain, jdbcType=VARCHAR},
+			</if>
+         </trim>
+	</insert>
+    
+	<update id="updateQues" parameterType="QquestionTab">
+        UPDATE q_question_tab  SET
+			<if test="quesName!=null and quesName!=''">
+			        QUES_NAME = #{quesName, jdbcType=VARCHAR},
+	      
+			</if>
+			<if test="chapterId!=null and chapterId!=''">
+			  CHAPTER_ID = #{chapterId, jdbcType=VARCHAR},
+	 
+			</if>
+			<if test="quesType!=null and quesType!=''">
+			       QUES_TYPE = #{quesType, jdbcType=VARCHAR},
+	    
+			</if>
+			<if test="quesAnswer!=null and quesAnswer!=''">
+			    QUES_ANSWER = #{quesAnswer, jdbcType=VARCHAR},
+	
+			</if>
+			<if test="quesOptions!=null and quesOptions!=''">
+			        QUES_OPTIONS = #{quesOptions, jdbcType=VARCHAR},
+
+			</if>
+			<if test="quesScore!=null and quesScore!=''">
+				        QUES_SCORE = #{quesScore, jdbcType=DECIMAL},
+			</if>
+        	  QUES_EXPLAIN = #{quesExplain, jdbcType=DECIMAL},
+			QUES_SERIAL = #{quesSerial, jdbcType=DECIMAL}
+        WHERE 
+	        QUES_ID = #{quesId} 
+	</update>
+
+    <delete id="deleteQues" parameterType="String" >
+        DELETE FROM q_question_tab WHERE QUES_ID = #{id} 
+    </delete>
+    
+    <select id="getIDQues" parameterType="String" resultMap="questionMap">
+     <![CDATA[
+		SELECT 
+		ques_name,ques_type,ques_options,ques_score,ques_serial,QUES_ID,QUES_ANSWER,QUES_EXPLAIN
+		 FROM q_question_tab  WHERE QUES_ID = #{id} 
+		  ]]>
+	</select>
+	
+	  <select id="getChapterIDQues" parameterType="String" resultMap="questionMap">
+     <![CDATA[
+		SELECT * FROM q_question_tab  WHERE CHAPTER_ID = #{id} 
+		  ]]>
+	</select>
+	  <select id="getSerial" parameterType="String" resultMap="questionMap">
+     <![CDATA[
+	select ques_serial,QUES_ID,QUES_TYPE
+			 from q_question_tab  
+			 where ques_id in (SELECT ques_id FROM q_paper_question where paper_id=#{paperId})  order by ques_serial
+		  ]]>
+	</select>
+	<select id="getSerial1" parameterType="String" resultMap="questionMap">
+	select *
+			 from q_question_tab  
+			 where ques_id in (SELECT ques_id FROM q_paper_question where paper_id=#{paperId}) order by ques_serial	
+	</select>
+	
+	<select id="getPageQues" parameterType="map" resultType="QquestionTab">
+	 <![CDATA[
+		SELECT * FROM q_question_tab
+		     ]]>
+	</select>
+	<select id="getPaperIdques"  parameterType="String" resultMap="questionMap">
+	select ques_name,ques_type,ques_options,ques_score,ques_serial,ques_id
+		 <![CDATA[
+			 from q_question_tab  
+			 where ques_id in (SELECT ques_id FROM q_paper_question where paper_id=#{id}) order by ques_serial
+		     ]]>
+	
+	</select>
+		<select id="getques"  parameterType="map" resultMap="questionMap">
+		<!-- SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+				select ques_name,ques_type,ques_options,ques_score,ques_serial,QUES_ID,QUES_ANSWER,QUES_EXPLAIN
+			 from q_question_tab  
+			 where ques_id in (SELECT ques_id FROM q_paper_question where paper_id=#{paperId})
+			 and ques_type=#{ques.quesType} order by ques_serial 
+			 	) M
+		WHERE ROWNUM &lt;= #{page}) z
+		WHERE RN >= #{page} -->
+		
+		
+		<include refid="pageS" />
+		
+				select ques_name,ques_type,ques_options,ques_score,ques_serial,QUES_ID,QUES_ANSWER,QUES_EXPLAIN
+			 from q_question_tab  
+			 where ques_id in (SELECT ques_id FROM q_paper_question where paper_id=#{paperId})
+			 and ques_type=#{ques.quesType} order by ques_serial 
+			 	
+		<include refid="pageE" />
+		
+	</select>
+	<!-- 查询该考试的总成绩 -->
+	<select id="getAllRestlt" parameterType="java.lang.String" resultType="int" >
+		select sum(ques_score)
+		FROM
+			(
+				SELECT
+					b.ques_id
+				FROM
+					p_paper_tab a
+				JOIN q_paper_question b ON a.paper_id = b.paper_id
+				AND a.paper_id = #{paperId}) c 
+				JOIN q_question_tab d ON c.ques_id = d.ques_id
+	</select>
+</mapper>
+

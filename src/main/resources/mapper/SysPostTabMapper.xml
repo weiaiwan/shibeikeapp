@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SysPostTabDao">
+	<resultMap id="postList" type="SysPostTab">
+        <result property="postId" column="POST_ID"/>
+        <result property="postName" column="POST_NAME"/>
+        <result property="unitCode" column="UNIT_CODE"/>
+        <result property="unitName" column="UNIT_NAME"/>
+        <result property="postCode" column="POST_CODE"/>
+        <result property="deptCode" column="DEPT_CODE"/>
+        <result property="deptName" column="DEPT_NAME"/>
+        <result property="sections_name" column="SECTIONS_NAME"/>
+        <result property="sections_code" column="SECTIONS_CODE"/>
+        <result property="cityBureau" column="cityBureau"/>
+        <result property="actualNum" column="ACTUAL_NUM"/>
+        <result property="joinNum" column="JOIN_NUM"/>
+        <result property="niceRate" column="NICE_RATE"/>
+        <result property="goodRate" column="GOOD_RATE"/>
+	</resultMap>
+
+    <delete id="deleteSysPostById" parameterType="String">
+    <![CDATA[
+        DELETE FROM sys_post_tab WHERE
+        POST_ID = #{id} 
+    ]]>
+    </delete>
+    
+    <select id="getSysPostById" resultType="SysPostTab" parameterType="String">
+		SELECT *
+	    <![CDATA[
+		    FROM sys_post_tab 
+	        WHERE 
+		        POST_ID = #{id} 
+	    ]]>
+	</select>
+	
+	<select id="getPost" resultMap="postList">
+		SELECT *
+	    <![CDATA[
+		    FROM sys_post_tab 
+	    ]]>
+	</select>
+	
+	<select id="getSectionsName" resultMap="postList">
+		select sections_name,count(post_id),max(unit_name) as unit_name from sys_post_tab group by sections_name	
+	</select>
+	
+	<select id="getAllSectionsByUnit" resultMap="postList" parameterType="String">
+		select * from sys_post_tab where unit_code = #{unitCode} and post_code is null and sections_code is not null
+	</select>
+	<select id="getAllUnit" resultMap="postList" parameterType="String" >
+		select unit_code,count(post_id),max(unit_name)as unit_name, max(cityBureau) as cityBureau from sys_post_tab 
+		<where>
+			<if test="_parameter != null and _parameter != '' ">
+				and unit_name like #{_parameter}
+			</if>
+		</where> 
+		group by unit_code	
+	</select>
+	
+	<select id="getGroupSection" resultMap="postList" >
+		select sections_code,count(post_id),max(sections_name) as sections_name from sys_post_tab group by sections_code	
+	</select>
+	
+	<select id="getCountByUnitcode" resultType="Integer" parameterType="String" >
+		select count(*) from sys_post_tab where unit_code = #{unidCode}	
+	</select>
+	
+	<select id="getCountBySectionscode" resultType="Integer" parameterType="String" >
+		select count(*) from sys_post_tab where sections_code = #{sectionsCode}	
+	</select>
+	<insert id="addUnit" useGeneratedKeys="false" keyProperty="postId" parameterType="SysPostTab">
+		insert into sys_post_tab(POST_ID,unit_code,unit_name,cityBureau) values (#{postId},#{unitCode},#{unitName},#{cityBureau})
+	</insert>
+	
+	<insert id="addSection" useGeneratedKeys="false" keyProperty="postId" parameterType="SysPostTab">
+		insert into sys_post_tab(POST_ID,unit_code,unit_name,sections_code,sections_name,cityBureau) values (#{postId},#{unitCode},#{unitName},#{sections_code},#{sections_name},#{cityBureau})
+	</insert>
+	<update id="updateUnitByCode" parameterType="SysPostTab">
+		UPDATE sys_post_tab SET unit_name = #{unitName},cityBureau = #{cityBureau} where unit_code = #{unitCode}
+	</update>
+	<update id="updateSectionsByCode" parameterType="SysPostTab">
+		UPDATE sys_post_tab SET sections_name = #{sections_name} where POST_ID = #{postId}
+	</update>
+	<delete id="deleteUnitByCode" parameterType="String">
+		 DELETE FROM sys_post_tab WHERE unit_code = #{unitCode} 
+	</delete>
+	
+	<select id="findUintCode" parameterType="String" resultMap="postList">
+		select * from sys_post_tab where unit_code = #{unitCode, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findByPostId" parameterType="String" resultMap="postList">
+		select * from sys_post_tab where POST_ID = #{PostId}
+	</select>
+	
+	<select id="getPostIdByUnitName"  resultType="java.lang.String" >
+		SELECT POST_ID FROM sys_post_tab WHERE 
+		UNIT_NAME = #{unitName,jdbcType=VARCHAR} 
+		AND SECTIONS_NAME = #{sectionName,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getPostIdByUnitName1"  resultType="java.lang.String" >
+		SELECT POST_ID FROM sys_post_tab WHERE 
+		UNIT_NAME = #{unitName,jdbcType=VARCHAR} 
+		AND SECTIONS_NAME is null
+	</select>
+	
+	<select id="getUP" resultMap="postList" parameterType="String">
+		select d.unit_name,d.sections_name,d.citybureau from(
+        select b.postId from sys_user_tab a 
+        join user_post_tab b on a.user_id=b.userId and 
+        user_id=#{userId}) c join sys_post_tab d on c.postId=d.post_id
+	</select>
+	<!-- 更新对应单位处室的考试情况 -->
+	<update id="updateKsqk" parameterType="SysPostTab">
+		UPDATE sys_post_tab SET 
+		ACTUAL_NUM =#{actualNum,jdbcType=VARCHAR},
+		JOIN_NUM=#{joinNum,jdbcType=VARCHAR},
+		NICE_RATE=#{niceRate,jdbcType=VARCHAR},
+		GOOD_RATE=#{goodRate,jdbcType=VARCHAR}
+		where 
+	    unit_code=#{unitCode,jdbcType=VARCHAR} 
+        <if test="sections_code !=null and sections_code != ''">
+		 and sections_code= #{sections_code,jdbcType=VARCHAR} 
+	    </if>
+	</update>
+</mapper>
+

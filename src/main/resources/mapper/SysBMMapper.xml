@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SysBMDao">
+	<resultMap id="BMMaps" type="SysBM">
+        <result property="id" column="BM_ID"/>
+        <result property="name" column="BM_Name"/>
+        <result property="tel" column="BM_TEL"/>
+        <result property="email" column="BM_EMAIL"/>
+        <result property="company" column="BM_COMPANY"/>
+        <result property="zhiwei" column="BM_ZHIWEI"/>
+        <result property="type" column="BM_TYPE"/>
+        <result property="time" column="BM_TIME"/>
+	</resultMap>
+		<insert id="InsertSysBM"  parameterType="map">
+			INSERT INTO sys_bm (
+				BM_ID,
+				BM_Name,
+				BM_TEL,
+				BM_EMAIL,
+				BM_COMPANY,
+				BM_ZHIWEI,
+				BM_TYPE
+			)
+			VALUES
+				(
+					#{id},
+					#{name},
+					#{tel},
+					#{email},
+					#{company},
+					#{zhiwei},
+					#{type}
+				);
+		</insert>
+	<select id="getFengHuiBaoMing" resultMap="BMMaps" parameterType="map">
+	
+		select * from sys_bm where 1=1 
+		<if test="name!=null and name!=''">
+			and BM_Name like CONCAT(CONCAT('%', #{name}), '%')
+		</if>
+		order by BM_TIME desc
+	</select>
+
+
+	
+	</mapper>

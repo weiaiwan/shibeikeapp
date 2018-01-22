@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.IndicatorDao">
+	<resultMap id="indicator" type="Indicator">
+		<result property="id" column="ID" />
+		<result property="pid" column="PID" />
+		<result property="indexLevel" column="INDEX_LEVEL" />
+		<result property="name" column="NAME" />
+		<result property="explain" column="EXPLAIN" />
+		<result property="attribution" column="ATTRIBUTION" />
+	</resultMap>
+	
+	<select id="getAllIndex" resultMap="indicator">
+		select * from INDICATOR order by id
+	</select>
+</mapper>
+

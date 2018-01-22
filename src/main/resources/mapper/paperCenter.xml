@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.PaperCenterDao">
+
+	<resultMap id="paperTab" type="PpaperTab">
+        <result property="paperId" column="PAPER_ID"/>
+        <result property="paperDesc" column="PAPER_DESC"/>
+        <result property="overTime" column="OVER_TIME"/>
+        <result property="startTime" column="START_TIME"/>
+        <result property="paperCode" column="PAPER_CODE"/>
+        <result property="paperName" column="PAPER_NAME"/>
+        <result property="postId" column="POST_ID"/>
+        <result property="paperImgUrl" column="PAPER_IMG_URL"/>
+		<result property="paperLevel" column="PAPER_LEVEL"/>
+		<result property="officeName" column="OFFICE_NAME"/>
+		<result property="paperMaker" column="PAPER_MAKER"/>
+		<result property="makerPhone" column="MAKER_PHONE"/>
+		<result property="paperType" column="PAPER_Type"/>
+		<result property="paperStater" column="PAPER_STATER"/>
+		<result property="pcType" column="PC_TYPE" />
+		<result property="pjurisType" column="PJURIS_TYPE" />
+	</resultMap>
+		<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+	</sql> -->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	<!-- 查询出所有试卷类型 -->
+	<select id="showPaperType" resultType="String" >
+		SELECT paper_type  
+	    <![CDATA[
+		    from p_paper_tab where paper_id in
+ (select a.paper_id from p_paper_tab a, q_paper_question b where a.paper_id=b.paper_id) group by paper_type 
+	    ]]>
+	</select>
+	<!-- 查询出各试卷类型的数量 -->
+	<select id="calPaperType" resultType="int" >
+		SELECT count(*)  from p_paper_tab where paper_id in
+ (select a.paper_id from p_paper_tab a, q_paper_question b where a.paper_id=b.paper_id) group by paper_type
+	</select>
+	<!-- 根据试卷类型和试卷等级查询试卷 -->
+	<select id="showPaperLevel" resultType="String" parameterType="String">
+		select paper_level 
+	    <![CDATA[    
+		    from p_paper_tab where paper_id in (select a.paper_id from p_paper_tab a, q_paper_question b where a.paper_id=b.paper_id)
+and paper_type=#{paperType} group by paper_level
+	    ]]>
+	</select>
+	<!-- 根据试卷类型和试卷等级查询试卷的数量 -->
+	<select id="calPaperLevel" resultType="int" parameterType="String">
+		select count(*) 
+	    <![CDATA[    
+		    from p_paper_tab where paper_id in (select a.paper_id from p_paper_tab a, q_paper_question b where a.paper_id=b.paper_id)
+		    and paper_type=#{paperType} group by paper_level
+	    ]]>
+	</select>
+	<!-- 根据各种条件查询试卷信息 -->
+	<select id="showPaper" resultMap="paperTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT PAPER_ID,PAPER_DESC,OVER_TIME,START_TIME,PAPER_CODE,PAPER_NAME,POST_ID,PAPER_IMG_URL,PAPER_LEVEL,OFFICE_NAME,PAPER_MAKER,MAKER_PHONE,PAPER_Type,PAPER_STATER
+	    <![CDATA[
+		     from p_paper_tab where paper_id in
+ (select a.paper_id from p_paper_tab a, q_paper_question b where a.paper_id=b.paper_id)
+	    ]]>
+<!-- 	    <where> -->
+			<if test="paperType!=null and paperType!=''">
+				AND PAPER_TYPE = #{paperType}
+			</if>
+			<if test="paperLevel !=null and paperLevel != ''">
+				AND PAPER_LEVEL = #{paperLevel}
+			</if>
+			<if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+			</if>
+			<if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+			</if>
+			AND PAPER_STATER='已审核'
+<!-- 		</where> -->
+		<include refid="pageE" />
+	</select>
+	<!-- 根据不同的条件查询课程的数量 -->
+	<select id="calPaper" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    from p_paper_tab where paper_id in
+ (select a.paper_id from p_paper_tab a, q_paper_question b where a.paper_id=b.paper_id)
+	    ]]>
+<!-- 	    <where> -->
+			<if test="paperType!=null and paperType!=''">
+				AND PAPER_TYPE = #{paperType}
+			</if>
+			<if test="paperLevel !=null and paperLevel != ''">
+				AND PAPER_LEVEL = #{paperLevel}
+			</if>
+			<if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+			</if>
+<!-- 		</where> -->
+	</select>
+	
+	
+	<!--法律法规  -->
+	<select id="showPaperByFlfg" resultMap="paperTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT PAPER_ID,PAPER_DESC,OVER_TIME,START_TIME,PAPER_CODE,PAPER_NAME,POST_ID,PAPER_IMG_URL,PAPER_LEVEL,OFFICE_NAME,PAPER_MAKER,MAKER_PHONE,PAPER_Type,PAPER_STATER
+	    <![CDATA[
+		     from p_paper_tab where paper_id in
+ 			(select a.paper_id from p_paper_tab a, q_paper_question b
+ 			 where a.paper_id=b.paper_id and paper_type like '%法律法规%'
+ 			 and paper_stater='已审核')
+	    ]]>
+	    <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+		<include refid="pageE" />
+	</select>
+	<select id="calPaperByFlfg" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    from p_paper_tab where paper_id in
+			 (select a.paper_id from p_paper_tab a, q_paper_question b
+			  where a.paper_id=b.paper_id  and paper_type like '%法律法规%'
+			  and paper_stater='已审核')
+	    ]]>
+	    <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+	</select>
+	
+	<!--专业统计 -->
+	<select id="showPaperByZytj" resultMap="paperTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT PAPER_ID,PAPER_DESC,OVER_TIME,START_TIME,PAPER_CODE,PAPER_NAME,POST_ID,PAPER_IMG_URL,PAPER_LEVEL,OFFICE_NAME,PAPER_MAKER,MAKER_PHONE,PAPER_Type,PAPER_STATER
+	    <![CDATA[
+		     from p_paper_tab where paper_id in
+ 			(select a.paper_id from p_paper_tab a, q_paper_question b
+ 			 where a.paper_id=b.paper_id and paper_type like CONCAT(CONCAT('%', #{paperType}), '%')
+ 			  and paper_stater='已审核')
+	    ]]>
+	    <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+		order by UP_DATE desc
+		<include refid="pageE" />
+	</select>
+	<select id="calPaperByZytj" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    from p_paper_tab where paper_id in
+			 (select a.paper_id from p_paper_tab a, q_paper_question b
+			  where a.paper_id=b.paper_id  and paper_type like CONCAT(CONCAT('%', #{paperType}), '%')
+			   and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+	</select>
+	
+	<!--法律法规  -->
+	<select id="showPaperByDgdj" resultMap="paperTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT PAPER_ID,PAPER_DESC,OVER_TIME,START_TIME,PAPER_CODE,PAPER_NAME,POST_ID,PAPER_IMG_URL,PAPER_LEVEL,OFFICE_NAME,PAPER_MAKER,MAKER_PHONE,PAPER_Type,PAPER_STATER
+	    <![CDATA[
+		     from p_paper_tab where paper_id in
+ 			(select a.paper_id from p_paper_tab a, q_paper_question b
+ 			 where a.paper_id=b.paper_id and paper_type like '%党规党纪%'
+ 			  and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+		<include refid="pageE" />
+	</select>
+	<select id="calPaperByDgdj" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    from p_paper_tab where paper_id in
+			 (select a.paper_id from p_paper_tab a, q_paper_question b
+			  where a.paper_id=b.paper_id  and paper_type like '%党规党纪%'
+			   and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+	</select>
+	
+	<!-- 根据对应的课程查询试卷 -->
+	<select id="getPaperS" resultMap="paperTab" parameterType="map">
+	<include refid="pageS" />
+		select a.* from P_PAPER_TAB a join (
+  			select course_type_name from CHAPTER_TAB 
+  			where chapter_id=#{chapterId,jdbcType=VARCHAR}) b 
+ 		on a.pc_type=b.course_type_name 
+ 		 <if test="paperName !=null and paperName != ''">
+		AND a.PAPER_NAME like CONCAT(CONCAT('%', #{paperName,jdbcType=VARCHAR}), '%')
+		</if>
+		 <if test="pjurisType !=null and pjurisType != ''">
+		AND a.PJURIS_TYPE like CONCAT(CONCAT('%', #{pjurisType,jdbcType=VARCHAR}), '%')
+		</if>
+		<include refid="pageE" />
+    </select>
+    
+    <select id="getPaperSCount" resultType="int" parameterType="java.lang.String">
+		select count(*) from P_PAPER_TAB a join (
+  			select course_type_name from CHAPTER_TAB 
+  			where chapter_id=#{chapterId,jdbcType=VARCHAR}) b 
+ 		on a.pc_type=b.course_type_name
+ 		<if test="paperName !=null and paperName != ''">
+		AND a.PAPER_NAME like CONCAT(CONCAT('%', #{paperName,jdbcType=VARCHAR}), '%')
+		</if>
+		 <if test="pjurisType !=null and pjurisType != ''">
+		AND a.PJURIS_TYPE like CONCAT(CONCAT('%', #{pjurisType,jdbcType=VARCHAR}), '%')
+		</if>
+	</select>
+	
+	<select id="showPaperByzc" resultMap="paperTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT PAPER_ID,PAPER_DESC,OVER_TIME,START_TIME,PAPER_CODE,PAPER_NAME,POST_ID,PAPER_IMG_URL,PAPER_LEVEL,OFFICE_NAME,PAPER_MAKER,MAKER_PHONE,PAPER_Type,PAPER_STATER
+	    <![CDATA[
+		     from p_paper_tab where paper_id in
+ 			(select a.paper_id from p_paper_tab a, q_paper_question b
+ 			 where a.paper_id=b.paper_id and paper_type like '%职称%'
+ 			  and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+		<include refid="pageE" />
+	</select>
+	<select id="calPaperByzc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    from p_paper_tab where paper_id in
+			 (select a.paper_id from p_paper_tab a, q_paper_question b
+			  where a.paper_id=b.paper_id  and paper_type like '%职称%'
+			   and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+	</select>
+	<select id="showPaperBypcdc" resultMap="paperTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT PAPER_ID,PAPER_DESC,OVER_TIME,START_TIME,PAPER_CODE,PAPER_NAME,POST_ID,PAPER_IMG_URL,PAPER_LEVEL,OFFICE_NAME,PAPER_MAKER,MAKER_PHONE,PAPER_Type,PAPER_STATER
+	    <![CDATA[
+		     from p_paper_tab where paper_id in
+ 			(select a.paper_id from p_paper_tab a, q_paper_question b
+ 			 where a.paper_id=b.paper_id and paper_type like '%普查调查%'
+ 			  and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+		<include refid="pageE" />
+	</select>
+	<select id="calPaperBypcdc" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    from p_paper_tab where paper_id in
+			 (select a.paper_id from p_paper_tab a, q_paper_question b
+			  where a.paper_id=b.paper_id  and paper_type like '%普查调查%'
+			   and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+	</select>
+	<select id="showPaperBytjjm" resultMap="paperTab" parameterType="java.util.Map">
+		<include refid="pageS" />
+		SELECT PAPER_ID,PAPER_DESC,OVER_TIME,START_TIME,PAPER_CODE,PAPER_NAME,POST_ID,PAPER_IMG_URL,PAPER_LEVEL,OFFICE_NAME,PAPER_MAKER,MAKER_PHONE,PAPER_Type,PAPER_STATER
+	    <![CDATA[
+		     from p_paper_tab where paper_id in
+ 			(select a.paper_id from p_paper_tab a, q_paper_question b
+ 			 where a.paper_id=b.paper_id and paper_type like '%统计建模%'
+ 			  and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+		<include refid="pageE" />
+	</select>
+	<select id="calPaperBytjjm" resultType="int" parameterType="java.util.Map">
+		SELECT count(*)
+	    <![CDATA[
+		    from p_paper_tab where paper_id in
+			 (select a.paper_id from p_paper_tab a, q_paper_question b
+			  where a.paper_id=b.paper_id  and paper_type like '%统计建模%'
+			   and paper_stater='已审核')
+	    ]]>
+	     <if test="paperName !=null and paperName != ''">
+				AND PAPER_NAME like CONCAT(CONCAT('%', #{paperName}), '%')
+		</if>
+	</select>
+</mapper>
+

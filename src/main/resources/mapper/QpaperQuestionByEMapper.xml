@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.ExamSystem.dao.QpaperQuestionDao">
+
+	<resultMap id="paperQuestion" type="QpaperQuestion">
+        <result property="paperQuesId" column="PAPER_QUES_ID"/>
+        <result property="paperId" column="PAPER_ID"/>
+        <result property="quesId" column="QUES_ID"/>
+        <result property="quesType" column="QUES_TYPE"/>
+	</resultMap>
+
+	<!-- useGeneratedKeys="true" keyProperty="xxx" for sqlserver and mysql -->
+	<insert id="saveQaperQues" keyProperty="paperQuesId">
+        INSERT INTO q_paper_question 
+         <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="paperQuesId!=null and paperQuesId!=''">
+        	PAPER_QUES_ID,	
+			</if>
+			<if test="paperId!=null and paperId!=''">
+        	PAPER_ID,	
+			</if>
+			<if test="quesId!=null and quesId!=''">
+        	QUES_ID,	
+			</if>
+			<if test="quesType!=null and quesType!=''">
+        	QUES_TYPE 	
+			</if>
+         </trim>
+   		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="paperQuesId!=null and paperQuesId!=''">
+        	#{paperQuesId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="paperId!=null and paperId!=''">
+        	#{paperId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="quesId!=null and quesId!=''">
+        	#{quesId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="quesType!=null and quesType!=''">
+        	#{quesType, jdbcType=VARCHAR} 	
+			</if>
+        </trim>
+		<!--	
+			oracle: order="BEFORE" SELECT sequenceName.nextval AS ID FROM DUAL 
+			DB2: order="BEFORE"" values nextval for sequenceName
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="userId">
+			SELECT sequenceName.nextval AS ID FROM DUAL 
+        </selectKey>
+		-->
+	</insert>
+		<select id="getSerial" resultType="int" parameterType="map">
+	 <![CDATA[
+		select count(*) from q_question_tab where QUES_ID  in
+		(select  ques_id from q_paper_question where  PAPER_ID = #{paper})
+		and ques_type=#{ceshi} and ques_serial=#{serial}
+	 	
+		     ]]>
+	</select>
+	
+	<delete id="delPaperQues" parameterType="string">
+	   delete from Q_PAPER_QUESTION  where PAPER_ID=#{paperId}
+	</delete>
+	
+	<!-- 删除审核试卷 -->
+	<delete id="delPapersQues" parameterType="java.lang.String" >
+ 		delete from Q_PAPER_QUESTION WHERE PAPER_ID = #{_parameter}
+	</delete>
+</mapper>
+

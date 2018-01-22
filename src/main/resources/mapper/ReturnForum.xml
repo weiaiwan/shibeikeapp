@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.returnForumDao">
+	<resultMap id="returnList" type="ReturnForum">
+		<result property="returnforumId" column="RETURN_FORUM_ID" />
+		<result property="returnuserCode" column="RETURN_USER_CODE" />
+		<result property="returnforumDesc" column="RETURN_FORUM_DESC" />
+		<result property="returnTime" column="RETURN_TIME" />
+		<result property="forumCode" column="FORUM_CODE" />
+		<result property="returnuserName" column="RETURN_USER_NAME" />
+		<result property="forumuserCode" column="FORUM_USER_CODE" />
+	</resultMap>
+
+	<!-- 根据留言Id查询出所有回复 -->
+	<select id="showReturnForum" parameterType="map" resultMap="returnList">
+	 select* from return_forum_tab  where forum_code= #{forumCode, jdbcType=VARCHAR} 
+	 order by RETURN_TIME desc
+	</select>
+    <!--根据留言Id查询出总数 -->
+	<select id="returnforumCount" parameterType="map" resultType="int">
+		select count(*) from return_forum_tab where FORUM_CODE = #{forumCode, jdbcType=VARCHAR} 
+		and FORUM_USER_CODE = #{forumuserCode, jdbcType=VARCHAR} 
+	</select> 
+    <!-- 增加评论 -->
+    	<insert id="insertreturnForum" parameterType="ReturnForum">
+		 INSERT INTO return_forum_tab
+		  <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="returnforumId !=null and returnforumId != ''">
+        	RETURN_FORUM_ID,	
+			</if>
+			<if test="returnuserCode !=null and returnuserCode != ''">
+			RETURN_USER_CODE,
+			</if>
+			<if test="returnforumDesc !=null and returnforumDesc != ''">
+        	RETURN_FORUM_DESC,	
+			</if>
+			<if test="returnTime !=null and returnTime != ''">
+        	RETURN_TIME,	
+			</if>
+			<if test="forumCode !=null and forumCode != ''">
+        	FORUM_CODE,	
+			</if>
+			<if test="returnuserName !=null and returnuserName != ''">
+        	RETURN_USER_NAME,	
+			</if>
+			<if test="forumuserCode !=null and forumuserCode != ''">
+        	FORUM_USER_CODE,	
+			</if>
+        	</trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="returnforumId !=null and returnforumId != ''">
+        	#{returnforumId, jdbcType=VARCHAR},	
+			</if>
+			<if test="returnuserCode !=null and returnuserCode != ''">
+        	#{returnuserCode, jdbcType=VARCHAR},	
+			</if>
+			<if test="returnforumDesc !=null and returnforumDesc != ''">
+        	#{returnforumDesc, jdbcType=VARCHAR},	
+			</if>
+			<if test="returnTime !=null and returnTime != ''">
+        	 #{returnTime, jdbcType=VARCHAR},	
+			</if>
+			<if test="forumCode !=null and forumCode != ''">
+        	 #{forumCode, jdbcType=VARCHAR},	
+			</if>
+			<if test="returnuserName !=null and returnuserName != ''">
+        	 #{returnuserName, jdbcType=VARCHAR},	
+			</if>
+			<if test="forumuserCode !=null and forumuserCode != ''">
+        	 #{forumuserCode, jdbcType=VARCHAR},	
+			</if>
+       </trim>
+	</insert>
+	</mapper>

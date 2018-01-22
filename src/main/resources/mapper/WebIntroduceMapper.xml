@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.WebIntroduceDao">
+	<resultMap id="webIntroduceList" type="WebIntroduce">
+		<result property="webIntrodId" column="web_introd_id" />
+		<result property="webIntrodCon" column="web_introd_con" />
+		<result property="userName" column="user_name" />
+		<result property="webIntrodDate" column="web_introd_date" />
+ 	</resultMap>
+	<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+	</sql> -->
+	
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+	<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	<select id="getId" resultType="java.lang.Integer">
+		select seq_WEB_INTRO.nextval from dual
+	</select>
+	<select id="getIntroduce"  resultMap="webIntroduceList">
+	  select * from web_introd
+	</select>
+	<select id="getAllIntroduce"  resultMap="webIntroduceList">
+	  select * from web_introd order by web_introd_date DESC
+	</select>
+	<select id="getCount"  resultType="int">
+	  select count(*) from web_introd
+	</select>
+	<insert id="insertIntroduce" parameterType="WebIntroduce">
+		 INSERT INTO web_introd (
+			<if test="webIntrodId !=null and webIntrodId != ''">
+        	web_introd_id ,	
+			</if>
+			<if test="webIntrodCon !=null and webIntrodCon != ''">
+			web_introd_con ,
+			</if>
+			<if test="userName !=null and userName != ''">
+        	USER_NAME ,	
+			</if>
+			<if test="webIntrodDate !=null and webIntrodDate != ''">
+        	web_introd_date 
+        	</if>
+        ) VALUES (
+			<if test="webIntrodId !=null and webIntrodId != ''">
+        	#{webIntrodId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="webIntrodCon !=null and webIntrodCon != ''">
+        	#{webIntrodCon, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="userName !=null and userName != ''">
+        	#{userName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="webIntrodDate !=null and webIntrodDate != ''">
+        	to_date(#{webIntrodDate}, 'yyyy-MM-dd   HH24:mi:ss ') 		
+			</if>
+        )
+	</insert>
+	<update id="updateIntroduce" parameterType="WebIntroduce">
+        UPDATE web_introd SET			
+			<if test="userName !=null and userName != ''">
+	        USER_Name = #{userName, jdbcType=VARCHAR} ,
+			</if>
+			<if test="webIntrodDate !=null and webIntrodDate != ''">
+	        web_introd_date = #{webIntrodDate, jdbcType=DATE},
+			</if>	
+			<if test="webIntrodCon !=null and webIntrodCon != ''">
+        	web_introd_con = #{webIntrodCon, jdbcType=VARCHAR} 	
+			</if>	
+	</update>
+	<select id="getIntroduceById"  resultMap="webIntroduceList" parameterType="String">
+	  select * from web_introd where web_introd_id = #{webIntrodId}
+	</select> 
+	<!-- 显示所有网站描述信息 -->
+	<select id="getIntroduceByPage"  resultMap="webIntroduceList">
+	<include refid="pageS" />
+      SELECT
+    web_introd_id,
+    USER_Name,
+    web_introd_con,
+    web_introd_date
+    FROM
+      web_introd
+      ORDER BY web_introd_date DESC
+		<include refid="pageE" />
+	</select>	
+</mapper>
+

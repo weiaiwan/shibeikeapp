@@ -1,0 +1,992 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="com.gbicc.shibeikeapp.dao.ChapterTabDao">
+<cache></cache>
+	<resultMap id="chapterTab" type="ChapterTab">
+		<result property="chapterId" column="CHAPTER_ID" />
+		<result property="chapterNameCode" column="CHAPTER_NAME_CODE" />
+		<result property="chapterName" column="CHAPTER_NAME" />
+		<result property="professionalTypeCode" column="PROFESSIONAL_TYPE_CODE" />
+		<result property="professionalName" column="PROFESSIONAL_NAME" />
+		<result property="courseTypeCode" column="COURSE_TYPE_CODE" />
+		<result property="courseTypeName" column="COURSE_TYPE_NAME" />
+		<result property="courseName" column="COURSE_NAME" />
+		<result property="postId" column="POST_ID" />
+		<result property="classsTime" column="CLASSS_TIME" />
+		<result property="trainer" column="TRAINER" />
+		<result property="trainerPhone" column="TRAINER_PHONE" />
+		<result property="upDate" column="UP_DATE" />
+		<result property="chapterOffice" column="CHAPTER_OFFICE" />
+		<result property="overTime" column="OVER_TIME" />
+		<result property="chapterDescribe" column="CHAPTER_DESCRIBE" />
+		<result property="testWay" column="TEST_WAY" />
+		<result property="chapterStater" column="CHAPTER_STATER" />
+		<result property="trainerUserId" column="TRAINER_USERID" />
+		<result property="upNumber" column="up_number" />
+		<result property="previewNumber" column="PREVIEN_NUMBER" />
+		<result property="chapterCode" column="CHAPTER_CODE" />
+		<result property="userId" column="USER_ID" />
+		<result property="tableName" column="TABLE_NAME" />
+		<result property="jurisType" column="JURIS_TYPE" />
+		<result property="imgName" column="IMG_NAME" />
+		<result property="imgUrl" column="IMG_URL" />
+		<result property="userName" column="USER_NAME" />
+		<result property="chapterStar" column="CHAPTER_STAR" />
+		<result property="chapterBq" column="CHAPTER_BQ" />
+		<result property="price" column="PRICE" />
+		<result property="weixin" column="WEIXIN" />
+		<result property="touxiang" column="TOUXIANG" />
+	</resultMap>
+	<!-- 分页开始 
+	<sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql>
+	<sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+
+	</sql>-->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+	<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	<select id="getcourseName" resultMap="chapterTab">
+		SELECT COURSE_TYPE_NAME
+	    <![CDATA[
+		    FROM chapter_tab group by COURSE_TYPE_NAME
+	    ]]>
+	</select>
+	<select id="getIdChaper" parameterType="String" resultMap="chapterTab">
+		SELECT *
+	    <![CDATA[
+		    FROM chapter_tab where CHAPTER_ID=#{chapterId}
+	    ]]>
+	</select>
+	
+	<select id="selectTrainerPhone" resultType="java.lang.String">
+	SELECT DISTINCT
+	TRAINER_PHONE
+	FROM
+		chapter_tab
+	 where TRAINER_PHONE is not null
+	</select>
+	
+	<update id="updateChaperSta" parameterType="map">
+		UPDATE chapter_tab SET
+		<if test="chapterStater !=null and chapterStater !=''">
+			CHAPTER_STATER = #{chapterStater}
+		</if>
+		WHERE
+		CHAPTER_ID=#{chaId}
+	</update>
+	<update id="updateChaper" parameterType="ChapterTab">
+		UPDATE chapter_tab SET
+		<if test="chapterName !=null and chapterName != ''">
+			CHAPTER_NAME =#{chapterName,jdbcType=VARCHAR},
+		</if>
+		<if test="professionalTypeCode !=null and professionalTypeCode != ''">
+			PROFESSIONAL_TYPE_CODE=#{professionalTypeCode,jdbcType=VARCHAR},
+		</if>
+		<if test="professionalName !=null and professionalName != ''">
+			PROFESSIONAL_NAME=#{professionalName,jdbcType=VARCHAR},
+		</if>
+		<if test="courseTypeCode !=null and courseTypeCode != ''">
+			COURSE_TYPE_CODE=#{courseTypeCode,jdbcType=VARCHAR},
+		</if>
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			COURSE_TYPE_NAME=#{courseTypeName,jdbcType=VARCHAR},
+		</if>
+			COURSE_NAME=#{courseName,jdbcType=VARCHAR},
+		<if test="postId !=null and postId != ''">
+			POST_ID=#{postId,jdbcType=VARCHAR},
+		</if>
+		<if test="classsTime !=null and classsTime != ''">
+			CLASSS_TIME=#{classsTime},
+		</if>
+		<if test="trainer !=null and trainer != ''">
+			TRAINER=#{trainer,jdbcType=VARCHAR},
+		</if>
+		<if test="trainerPhone !=null and trainerPhone != ''">
+			TRAINER_PHONE=#{trainerPhone,jdbcType=VARCHAR},
+		</if>
+		<if test="upDate !=null and upDate!= '' ">
+			UP_DATE=#{upDate},
+		</if>
+		<if test="chapterOffice !=null and chapterOffice!= '' ">
+			CHAPTER_OFFICE=#{chapterOffice,jdbcType=VARCHAR},
+		</if>
+		<if test="overTime !=null and overTime!= '' ">
+			OVER_TIME=#{overTime},
+		</if>
+		<if test="chapterDescribe !=null and chapterDescribe!= '' ">
+			CHAPTER_DESCRIBE=#{chapterDescribe,jdbcType=VARCHAR},
+		</if>
+		<if test="testWay!=null and testWay != '' ">
+			TEST_WAY=#{testWay,jdbcType=VARCHAR},
+		</if>
+		<if test="chapterNameCode !=null and chapterNameCode != '' ">
+			CHAPTER_NAME_CODE=#{chapterNameCode,jdbcType=VARCHAR},
+		</if>
+		<if test="professionalTypeCode !=null and professionalTypeCode != '' ">
+			PROFESSIONAL_TYPE_CODE=#{professionalTypeCode,jdbcType=VARCHAR},
+		</if>
+		<if test="courseTypeCode !=null and courseTypeCode != '' ">
+			COURSE_TYPE_CODE=#{courseTypeCode,jdbcType=VARCHAR},
+		</if>
+		<if test="trainerUserId !=null and trainerUserId != '' ">
+			TRAINER_USERID=#{trainerUserId,jdbcType=VARCHAR},
+		</if>
+		<if test="chapterStar !=null and chapterStar != '' ">
+			CHAPTER_STAR=#{chapterStar,jdbcType=VARCHAR},
+		</if>
+		<if test="chapterBq !=null and chapterBq != '' ">
+			CHAPTER_BQ=#{chapterBq,jdbcType=VARCHAR},
+		</if>
+		<if test="price !=null and price != '' ">
+			PRICE=#{price,jdbcType=VARCHAR},
+		</if>
+		CHAPTER_CODE=#{chapterCode,jdbcType=VARCHAR},
+		TABLE_NAME=#{tableName,jdbcType=VARCHAR},
+		up_number=#{upNumber},
+		PREVIEN_NUMBER=#{previewNumber},
+		CHAPTER_STATER=#{chapterStater,jdbcType=VARCHAR}
+		WHERE
+		CHAPTER_ID=#{chapterId,jdbcType=VARCHAR}
+	</update>
+
+	<insert id="AddChap" parameterType="DistributionAuth">
+		INSERT INTO chapter_tab (
+		<if test="chapterName !=null and chapterName != ''">
+			CHAPTER_NAME ,
+		</if>
+		<if test="professionalTypeCode !=null and professionalTypeCode != ''">
+			PROFESSIONAL_TYPE_CODE ,
+		</if>
+		<if test="professionalName !=null and professionalName != ''">
+			PROFESSIONAL_NAME ,
+		</if>
+		<if test="courseTypeCode !=null and courseTypeCode != ''">
+			COURSE_TYPE_CODE ,
+		</if>
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			COURSE_TYPE_NAME ,
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			COURSE_NAME ,
+		</if>
+		<if test="postId !=null and postId != ''">
+			POST_ID ,
+		</if>
+		<if test="classsTime !=null and classsTime != ''">
+			CLASSS_TIME ,
+		</if>
+		<if test="trainer !=null and trainer != ''">
+			TRAINER ,
+		</if>
+		<if test="trainerPhone !=null and trainerPhone != ''">
+			TRAINER_PHONE ,
+		</if>
+		<if test="upDate!=null and upDate!= '' ">
+			UP_DATE ,
+		</if>
+		<if test="chapterOffice!=null and chapterOffice!= '' ">
+			CHAPTER_OFFICE ,
+		</if>
+		<if test="overTime!=null and overTime!= '' ">
+			OVER_TIME ,
+		</if>
+		<if test="chapterDescribe!=null and chapterDescribe!= '' ">
+			CHAPTER_DESCRIBE ,
+		</if>
+		<if test="testWay!=null and testWay!= '' ">
+			TEST_WAY,
+		</if>
+		<if test="chapterStater !=null and chapterStater != '' ">
+			CHAPTER_STATER,
+		</if>
+		<if test="chapterNameCode !=null and chapterNameCode != '' ">
+			CHAPTER_NAME_CODE,
+		</if>
+		<if test="professionalTypeCode !=null and professionalTypeCode != '' ">
+			PROFESSIONAL_TYPE_CODE,
+		</if>
+		<if test="courseTypeCode !=null and courseTypeCode != '' ">
+			COURSE_TYPE_CODE,
+		</if>
+		<if test="trainerUserId !=null and trainerUserId != '' ">
+			TRAINER_USERID,
+		</if>
+		<if test="upNumber !=null and upNumber != '' ">
+			up_number,
+		</if>
+		<if test="previewNumber !=null and previewNumber != '' ">
+			PREVIEN_NUMBER,
+		</if>
+		<if test="tableName !=null and tableName != '' ">
+			TABLE_NAME,
+		</if>
+		<if test="chapterCode !=null and chapterCode != '' ">
+			CHAPTER_CODE,
+		</if>
+		<if test="imgName !=null and imgName != '' ">
+			IMG_NAME,
+		</if>
+		<if test="imgUrl !=null and imgUrl != '' ">
+			IMG_URL,
+		</if>
+		<if test="chapterStar !=null and chapterStar != '' ">
+			CHAPTER_STAR,
+		</if>
+		<if test="chapterBq !=null and chapterBq != '' ">
+			CHAPTER_BQ,
+		</if>
+		<if test="price !=null and price != '' ">
+			PRICE,
+		</if>
+		<if test="weixin !=null and weixin != '' ">
+			WEIXIN,
+		</if>
+		<if test="touxiang !=null and touxiang != '' ">
+			TOUXIANG,
+		</if>
+		CHAPTER_ID
+		) VALUES (
+		<if test="chapterId !=null and chapterId != ''">
+		</if>
+		<if test="chapterName !=null and chapterName != ''">
+			#{chapterName, jdbcType=VARCHAR} ,
+		</if>
+		<if test="professionalTypeCode !=null and professionalTypeCode != ''">
+			#{professionalTypeCode, jdbcType=VARCHAR} ,
+		</if>
+		<if test="professionalName !=null and professionalName != ''">
+			#{professionalName, jdbcType=VARCHAR} ,
+		</if>
+		<if test="courseTypeCode !=null and courseTypeCode != ''">
+			#{courseTypeCode, jdbcType=VARCHAR} ,
+		</if>
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			#{courseTypeName, jdbcType=VARCHAR} ,
+		</if>
+		<if test="courseName !=null and courseName != ''">
+			#{courseName, jdbcType=VARCHAR} ,
+		</if>
+		<if test="postId !=null and postId != ''">
+			#{postId, jdbcType=VARCHAR} ,
+		</if>
+		<if test="classsTime !=null and classsTime != ''">
+			#{classsTime, jdbcType=DECIMAL} ,
+		</if>
+		<if test="trainer !=null and trainer != ''">
+			#{trainer, jdbcType=VARCHAR} ,
+		</if>
+		<if test="trainerPhone !=null and trainerPhone != ''">
+			#{trainerPhone, jdbcType=VARCHAR} ,
+		</if>
+		<if test="upDate!=null and upDate!= ''">
+			#{upDate, jdbcType=DATE},
+		</if>
+		<if test="chapterOffice!=null and chapterOffice!= '' ">
+			#{chapterOffice,jdbcType=VARCHAR},
+		</if>
+		<if test="overTime!=null and overTime!= '' ">
+			#{overTime,jdbcType=DATE},
+		</if>
+		<if test="chapterDescribe!=null and chapterDescribe!= '' ">
+			#{chapterDescribe,jdbcType=VARCHAR},
+		</if>
+		<if test="testWay!=null and testWay!= '' ">
+			#{testWay,jdbcType=VARCHAR},
+		</if>
+		<if test="chapterStater !=null and chapterStater != '' ">
+			#{chapterStater,jdbcType=VARCHAR},
+		</if>
+		<if test="chapterNameCode !=null and chapterNameCode != '' ">
+			#{chapterNameCode,jdbcType=VARCHAR},
+		</if>
+		<if test="professionalTypeCode !=null and professionalTypeCode != '' ">
+			#{professionalTypeCode,jdbcType=VARCHAR},
+		</if>
+		<if test="courseTypeCode !=null and courseTypeCode != '' ">
+			#{courseTypeCode,jdbcType=VARCHAR},
+		</if>
+		<if test="trainerUserId !=null and trainerUserId != '' ">
+			#{trainerUserId,jdbcType=VARCHAR},
+		</if>
+		<if test="upNumber !=null and upNumber != '' ">
+			#{upNumber},
+		</if>
+		<if test="previewNumber !=null and previewNumber != '' ">
+			#{previewNumber},
+		</if>
+		<if test="tableName !=null and tableName != '' ">
+			#{tableName},
+		</if>
+		<if test="chapterCode !=null and chapterCode != '' ">
+			#{chapterCode},
+		</if>
+		<if test="imgName !=null and imgName != '' ">
+			#{imgName},
+		</if>
+		<if test="imgUrl !=null and imgUrl != '' ">
+			#{imgUrl},
+		</if>
+		<if test="chapterStar !=null and chapterStar != '' ">
+			#{chapterStar},
+		</if>
+		<if test="chapterBq !=null and chapterBq != '' ">
+			#{chapterBq},
+		</if>
+		<if test="price !=null and price != '' ">
+			#{price},
+		</if>
+		<if test="weixin !=null and weixin != '' ">
+			#{weixin},
+		</if>
+		<if test="touxiang !=null and touxiang != '' ">
+			#{touxiang}
+		</if>
+		#{chapterId, jdbcType=VARCHAR}
+		)
+	</insert>
+	<select id="countChap" parameterType="map" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM chapter_tab 
+	    ]]>
+		<where>
+			<if test="chap.chapterId !=null and chap.chapterId != ''">
+				AND CHAPTER_ID = #{chap.chapterId}
+			</if>
+			<if test="chap.chapterName !=null and chap.chapterName != ''">
+				AND CHAPTER_NAME = #{chap.chapterName}
+			</if>
+			<if
+				test="chap.professionalTypeCode !=null and chap.professionalTypeCode != ''">
+				AND PROFESSIONAL_TYPE_CODE = #{chap.professionalTypeCode}
+			</if>
+			<if test="chap.professionalName !=null and chap.professionalName != ''">
+				AND PROFESSIONAL_NAME = #{chap.professionalName}
+			</if>
+			<if test="chap.courseTypeCode !=null and chap.courseTypeCode != ''">
+				AND COURSE_TYPE_CODE = #{chap.courseTypeCode}
+			</if>
+			<if test="chap.courseTypeName!=null and chap.courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{chap.courseTypeName}
+			</if>
+			<if test="chap.postId !=null and chap.postId != ''">
+				AND POST_ID = #{chap.postId}
+			</if>
+			<if test="chap.classsTime !=null and chap.classsTime != ''">
+				AND CLASSS_TIME = #{chap.classsTime}
+			</if>
+			<if test="chap.trainer !=null and chap.trainer != ''">
+				AND TRAINER = #{chap.trainer}
+			</if>
+			<if test="chap.trainerPhone !=null and chap.trainerPhone != ''">
+				AND TRAINER_PHONE = #{chap.trainerPhone}
+			</if>
+			<if test="chap.chapterOffice!=null and chap.chapterOffice!= '' ">
+				AND CHAPTER_OFFICE=#{chap.chapterOffice}
+			</if>
+			<if test="chap.overTime!=null and chap.overTime!= '' ">
+				AND OVER_TIME=#{chap.overTime}
+			</if>
+			<if test="chap.chapterDescribe!=null and chap.chapterDescribe!= '' ">
+				AND CHAPTER_DESCRIDE=#{chap.chapterDescribe}
+			</if>
+			<if test="chap.testWay!=null and chap.testWay!= '' ">
+				AND TEST_WAY=#{chap.testWay}
+			</if>
+			<if test="chap.trainerUserId !=null and chap.trainerUserId != '' ">
+				AND TRAINER_USERID=#{chap.trainerUserId,jdbcType=VARCHAR}
+			</if>
+			<if test="chap.chapterStater!=null and chap.chapterStater!= '' ">
+				AND CHAPTER_STATER in ('已审核','审核中')
+			</if>
+		</where>
+	</select>
+	<select id="getChap" parameterType="map" resultMap="chapterTab">
+		<include refid="pageS" />
+		SELECT *
+	    <![CDATA[
+		    FROM chapter_tab
+	    ]]>
+		<include refid="setCondition" />
+		order by UP_DATE desc
+		<include refid="pageE" />
+	</select>
+	<select id="getChapup" parameterType="map" resultMap="chapterTab">
+		<include refid="pageS" />
+		SELECT *
+	    <![CDATA[
+		    FROM chapter_tab
+	    ]]>
+		<include refid="setCondition" />
+		order by up_number desc
+		<include refid="pageE" />
+	</select>
+	
+	<!-- 查看个人学习记录 -->
+	<select id="getRecode" parameterType="map" resultMap="chapterTab">
+		<include refid="pageS" />
+		 SELECT a.CHAPTER_ID,a.IMG_URL,a.CHAPTER_NAME,a.CHAPTER_STATER,a.PROFESSIONAL_TYPE_CODE,
+		 a.PROFESSIONAL_NAME,a.COURSE_TYPE_CODE,a.COURSE_NAME,a.CHAPTER_NAME_CODE,
+		 a.CLASSS_TIME,a.TRAINER_USERID,a.TRAINER,a.TRAINER_PHONE,a.OVER_TIME,
+		 a.CHAPTER_OFFICE,a.CHAPTER_DESCRIBE,a.TEST_WAY,a.POST_ID,a.UP_DATE,
+		 a.COURSE_TYPE_NAME,a.CHAPTER_CODE,b.user_id ,b.up_NUMBER,b.previen_NUMBER,c.USER_NAME
+		 FROM chapter_tab a,sys_user_chap b ,sys_user_tab c where a.chapter_id=b.chap_id and b.user_id=c.user_id
+		 <if test="userId!=null and userId != ''">
+			and b.user_id=#{userId}
+		 </if>
+		 <include refid="setCondition2" />
+		 order by a.UP_DATE desc
+		<include refid="pageE" />
+	</select>
+	
+	<select id="getRecodecount" parameterType="map" resultType="int">
+		select count(*) from(
+		 SELECT a.CHAPTER_ID,a.CHAPTER_NAME,a.CHAPTER_STATER,a.PROFESSIONAL_TYPE_CODE,
+		 a.PROFESSIONAL_NAME,a.COURSE_TYPE_CODE,a.COURSE_NAME,a.CHAPTER_NAME_CODE,
+		 a.CLASSS_TIME,a.TRAINER_USERID,a.TRAINER,a.TRAINER_PHONE,a.OVER_TIME,
+		 a.CHAPTER_OFFICE,a.CHAPTER_DESCRIBE,a.TEST_WAY,a.POST_ID,a.UP_DATE,
+		 a.COURSE_TYPE_NAME,a.CHAPTER_CODE,b.user_id ,b.up_NUMBER,b.previen_NUMBER
+		 FROM chapter_tab a,sys_user_chap b ,sys_user_tab c where a.chapter_id=b.chap_id and b.user_id=c.user_id
+		<if test="userId!=null and userId != ''">
+			and b.user_id=#{userId}
+		 </if>
+		 <include refid="setCondition2" />
+		 order by up_number desc )c
+	</select>
+
+	<select id="getChapTrain" parameterType="map" resultMap="chapterTab">
+		<include refid="pageS" />
+		SELECT *
+		<!-- max(up_date) as up_date ,
+		max(chapter_stater) as chapter_stater,
+		max(chapter_id) as chapter_id,
+		max(chapter_name) as chapter_name,
+		max(professional_name) as professional_name,
+		max(course_name) as course_name,
+		max(trainer) as trainer,
+		max(trainer_phone) as trainer_phone ,
+		max(over_time) as over_time,
+		max(chapter_office) as chapter_office,
+		max(chapter_describe) as chapter_describe,
+		max(course_type_name) as course_type_name,
+		max(up_number) as up_number,
+		max(chapter_code) as chapter_code -->
+		  <![CDATA[
+		FROM chapter_tab
+		  ]]>
+		<include refid="setCondition" />
+		order by up_date desc
+		<include refid="pageE" />
+	</select>
+	
+	<!-- 查询审核通过的课程 -->
+	<select id="getChapTrains" parameterType="map" resultMap="chapterTab" useCache="true">
+		<include refid="pageS" />
+		SELECT *
+		<!-- max(up_date) as up_date ,
+		max(chapter_stater) as chapter_stater,
+		max(chapter_id) as chapter_id,
+		max(chapter_name) as chapter_name,
+		max(professional_name) as professional_name,
+		max(course_name) as course_name,
+		max(trainer) as trainer,
+		max(trainer_phone) as trainer_phone ,
+		max(over_time) as over_time,
+		max(chapter_office) as chapter_office,
+		max(chapter_describe) as chapter_describe,
+		max(course_type_name) as course_type_name,
+		max(up_number) as up_number,
+		max(chapter_code) as chapter_code -->
+		  <![CDATA[
+		FROM chapter_tab
+		  ]]>
+		
+		<include refid="conditions" />
+		order by up_date desc
+		<include refid="pageE" />
+	</select>
+	<select id="countChapTrain" parameterType="map" resultType="int" useCache="true">
+		select count(*) from chapter_tab
+		<where>
+			chapter_id in (select max(chapter_id) from chapter_tab group by chapter_id)
+			<if test="chap.chapterName !=null and chap.chapterName != ''">
+				AND CHAPTER_NAME = #{chap.chapterName}
+			</if>
+			<if
+				test="chap.professionalTypeCode !=null and chap.professionalTypeCode != ''">
+				AND PROFESSIONAL_TYPE_CODE = #{chap.professionalTypeCode}
+			</if>
+			<if test="chap.professionalName !=null and chap.professionalName != ''">
+				AND PROFESSIONAL_NAME = #{chap.professionalName}
+			</if>
+			<if test="chap.courseTypeCode !=null and chap.courseTypeCode != ''">
+				AND COURSE_TYPE_CODE = #{chap.courseTypeCode}
+			</if>
+			<if test="chap.courseTypeName!=null and chap.courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{chap.courseTypeName}
+			</if>
+			<if test="chapterId!=null and chapterId != ''">
+				AND CHAPTER_ID = #{chapterId}
+			</if>
+			<if test="chap.postId !=null and chap.postId != ''">
+				AND POST_ID = #{chap.postId}
+			</if>
+			<if test="chap.classsTime !=null and chap.classsTime != ''">
+				AND CLASSS_TIME = #{chap.classsTime}
+			</if>
+			<if test="chap.trainer !=null and chap.trainer != ''">
+				AND TRAINER = #{chap.trainer}
+			</if>
+			<if test="chap.trainerPhone !=null and chap.trainerPhone != ''">
+				AND TRAINER_PHONE = #{chap.trainerPhone}
+			</if>
+			<if test="chap.chapterOffice!=null and chap.chapterOffice!= '' ">
+				AND CHAPTER_OFFICE=#{chap.chapterOffice}
+			</if>
+			<if test="chap.overTime!=null and chap.overTime!= '' ">
+				AND OVER_TIME=#{chap.overTime}
+			</if>
+			<if test="chap.chapterDescribe!=null and chap.chapterDescribe!= '' ">
+				AND CHAPTER_DESCRIDE=#{chap.chapterDescribe}
+			</if>
+			<if test="chap.testWay!=null and chap.testWay!= '' ">
+				AND TEST_WAY=#{chap.testWay}
+			</if>
+			<if test="chap.chapterStater!=null and chap.chapterStater!= '' ">
+				AND CHAPTER_STATER in ('已审核','审核中')
+			</if>
+			<!-- <if test="chap.trainerUserId !=null and chap.trainerUserId != '' ">
+				AND TRAINER_USERID=#{chap.trainerUserId,jdbcType=VARCHAR}
+			</if> -->
+		</where>
+	</select>
+	<select id="getChaperName" parameterType="java.util.Map" resultMap="chapterTab">
+		SELECT * FROM chapter_tab
+		<where>
+			<if test="courseName!=null and courseName != ''">
+				AND course_name = #{courseName}
+			</if>
+			<if test="tableName and tableName != ''">
+				AND table_Name = #{tableName}
+			</if>
+		</where>
+	</select>
+	<sql id="setCondition">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="chap.chapterId !=null and chap.chapterId != ''">
+				AND CHAPTER_ID = #{chap.chapterId}
+			</if>
+			<if test="chap.chapterName !=null and chap.chapterName != ''">
+				AND CHAPTER_NAME = #{chap.chapterName}
+			</if>
+			<if
+				test="chap.professionalTypeCode !=null and chap.professionalTypeCode != ''">
+				AND PROFESSIONAL_TYPE_CODE = #{chap.professionalTypeCode}
+			</if>
+			<if test="chap.professionalName !=null and chap.professionalName != ''">
+				AND PROFESSIONAL_NAME = #{chap.professionalName}
+			</if>
+			<if test="chap.courseTypeCode !=null and chap.courseTypeCode != ''">
+				AND COURSE_TYPE_CODE = #{chap.courseTypeCode}
+			</if>
+			<if test="chap.courseTypeName!=null and chap.courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{chap.courseTypeName}
+			</if>
+			<if test="chap.courseName !=null and chap.courseName != ''">
+				AND COURSE_NAME = #{chap.courseName}
+			</if>
+			<if test="chap.postId !=null and chap.postId != ''">
+				AND POST_ID = #{chap.postId}
+			</if>
+			<if test="chap.classsTime !=null and chap.classsTime != ''">
+				AND CLASSS_TIME = #{chap.classsTime}
+			</if>
+			<if test="chap.trainer !=null and chap.trainer != ''">
+				AND TRAINER = #{chap.trainer}
+			</if>
+			<if test="chap.trainerPhone !=null and chap.trainerPhone != ''">
+				AND TRAINER_PHONE = #{chap.trainerPhone}
+			</if>
+			<if test="chap.chapterOffice!=null and chap.chapterOffice!= '' ">
+				AND CHAPTER_OFFICE=#{chap.chapterOffice}
+			</if>
+			<if test="chap.overTime!=null and chap.overTime!= '' ">
+				AND OVER_TIME=#{chap.overTime}
+			</if>
+			<if test="chap.chapterDescribe!=null and chap.chapterDescribe!= '' ">
+				AND CHAPTER_DESCRIDE=#{chap.chapterDescribe}
+			</if>
+			<if test="chap.testWay!=null and chap.testWay!= '' ">
+				AND TEST_WAY=#{chap.testWay}
+			</if>
+			<if test="chap.chapterStater!= null and chap.chapterStater!= '' ">
+				AND CHAPTER_STATER in ('已审核','审核中')
+			</if>
+			<!-- <if test="chap.trainerUserId !=null and chap.trainerUserId != '' ">
+				AND TRAINER_USERID=#{chap.trainerUserId,jdbcType=VARCHAR}
+			</if> -->
+		</where>
+	</sql>
+	
+	<sql id="setCondition2">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+			<if test="chap.chapterId !=null and chap.chapterId != ''">
+				AND CHAPTER_ID = #{chap.chapterId}
+			</if>
+			<if test="chap.chapterName !=null and chap.chapterName != ''">
+				AND CHAPTER_NAME = #{chap.chapterName}
+			</if>
+			<if
+				test="chap.professionalTypeCode !=null and chap.professionalTypeCode != ''">
+				AND PROFESSIONAL_TYPE_CODE = #{chap.professionalTypeCode}
+			</if>
+			<if test="chap.professionalName !=null and chap.professionalName != ''">
+				AND PROFESSIONAL_NAME = #{chap.professionalName}
+			</if>
+			<if test="chap.courseTypeCode !=null and chap.courseTypeCode != ''">
+				AND COURSE_TYPE_CODE = #{chap.courseTypeCode}
+			</if>
+			<if test="chap.courseTypeName!=null and chap.courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{chap.courseTypeName}
+			</if>
+			<if test="chap.courseName !=null and chap.courseName != ''">
+				AND COURSE_NAME = #{chap.courseName}
+			</if>
+			<if test="chap.postId !=null and chap.postId != ''">
+				AND POST_ID = #{chap.postId}
+			</if>
+			<if test="chap.classsTime !=null and chap.classsTime != ''">
+				AND CLASSS_TIME = #{chap.classsTime}
+			</if>
+			<if test="chap.trainer !=null and chap.trainer != ''">
+				AND TRAINER = #{chap.trainer}
+			</if>
+			<if test="chap.trainerPhone !=null and chap.trainerPhone != ''">
+				AND TRAINER_PHONE = #{chap.trainerPhone}
+			</if>
+			<if test="chap.chapterOffice!=null and chap.chapterOffice!= '' ">
+				AND CHAPTER_OFFICE=#{chap.chapterOffice}
+			</if>
+			<if test="chap.overTime!=null and chap.overTime!= '' ">
+				AND OVER_TIME=#{chap.overTime}
+			</if>
+			<if test="chap.chapterDescribe!=null and chap.chapterDescribe!= '' ">
+				AND CHAPTER_DESCRIDE=#{chap.chapterDescribe}
+			</if>
+			<if test="chap.testWay!=null and chap.testWay!= '' ">
+				AND TEST_WAY=#{chap.testWay}
+			</if>
+			<if test="chap.chapterStater!= null and chap.chapterStater!= '' ">
+				AND CHAPTER_STATER in ('已审核','审核中')
+			</if>
+			<!-- <if test="chap.trainerUserId !=null and chap.trainerUserId != '' ">
+				AND TRAINER_USERID=#{chap.trainerUserId,jdbcType=VARCHAR}
+			</if> -->
+		</sql>
+	
+	
+	<sql id="conditions">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+			<if test="chap.chapterId !=null and chap.chapterId != ''">
+				AND CHAPTER_ID = #{chap.chapterId}
+			</if>
+			<if test="chap.chapterName !=null and chap.chapterName != ''">
+				AND CHAPTER_NAME = #{chap.chapterName}
+			</if>
+			<if test="chap.professionalTypeCode !=null and chap.professionalTypeCode != ''">
+				AND PROFESSIONAL_TYPE_CODE = #{chap.professionalTypeCode}
+			</if>
+			<if test="chap.professionalName !=null and chap.professionalName != ''">
+				AND PROFESSIONAL_NAME = #{chap.professionalName}
+			</if>
+			<if test="chap.courseTypeCode !=null and chap.courseTypeCode != ''">
+				AND COURSE_TYPE_CODE = #{chap.courseTypeCode}
+			</if>
+			<if test="chap.courseTypeName!=null and chap.courseTypeName != ''">
+				AND COURSE_TYPE_NAME = #{chap.courseTypeName}
+			</if>
+			<if test="chap.courseName !=null and chap.courseName != ''">
+				AND COURSE_NAME = #{chap.courseName}
+			</if>
+			<if test="chap.postId !=null and chap.postId != ''">
+				AND POST_ID = #{chap.postId}
+			</if>
+			<if test="chap.classsTime !=null and chap.classsTime != ''">
+				AND CLASSS_TIME = #{chap.classsTime}
+			</if>
+			<if test="chap.trainer !=null and chap.trainer != ''">
+				AND TRAINER = #{chap.trainer}
+			</if>
+			<if test="chap.trainerPhone !=null and chap.trainerPhone != ''">
+				AND TRAINER_PHONE = #{chap.trainerPhone}
+			</if>
+			<if test="chap.chapterOffice!=null and chap.chapterOffice!= '' ">
+				AND CHAPTER_OFFICE=#{chap.chapterOffice}
+			</if>
+			<if test="chap.overTime!=null and chap.overTime!= '' ">
+				AND OVER_TIME=#{chap.overTime}
+			</if>
+			<if test="chap.chapterDescribe!=null and chap.chapterDescribe!= '' ">
+				AND CHAPTER_DESCRIDE=#{chap.chapterDescribe}
+			</if>
+			<if test="chap.testWay!=null and chap.testWay!= '' ">
+				AND TEST_WAY=#{chap.testWay}
+			</if>
+			<if test="chap.chapterStater!= null and chap.chapterStater!= '' ">
+				AND CHAPTER_STATER =#{chap.chapterStater}
+			</if>
+			<if test="chap.trainerUserId !=null and chap.trainerUserId != '' ">
+				AND TRAINER_USERID=#{chap.trainerUserId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</sql>
+	<!-- 把审核中的数据变成已审核或者驳回 -->
+	<update id="updateChap" parameterType="ChapterTab">
+		UPDATE chapter_tab SET
+		<if test="chapterStater !=null and chapterStater != ''">
+			chapter_stater=#{chapterStater}
+		</if>
+		<where>
+			<if test="chapterId !=null and chapterId != ''">
+				chapter_id=#{chapterId}
+			</if>
+		</where>
+	</update>
+	<!-- 根据id查询 -->
+	<select id="getChapById" parameterType="String" resultMap="chapterTab">
+		select * from chapter_tab where chapter_id=#{chapterId}
+	</select>
+	<select id="getPageChaper" parameterType="map" resultMap="chapterTab">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+		select
+		CHAPTER_ID,COURSE_NAME,up_number,PREVIEN_NUMBER from chapter_tab
+		where CHAPTER_STATER='已审核'
+		order by up_number desc
+		) M
+		WHERE ROWNUM &lt;= 10)
+		WHERE RN >=1
+	</select>
+	<select id="findChap" resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		(
+		SELECT
+		MAX(a.up_date)
+		FROM
+		chapter_tab a
+		WHERE
+		a.chapter_stater in('已审核','审核中')
+		GROUP BY
+		a.course_name
+		) a
+	</select>
+	<delete id="deleteChapter" parameterType="java.lang.String">
+		 DELETE FROM chapter_tab WHERE CHAPTER_ID = #{chapterId} 
+	</delete>
+	
+	<!-- 删除审核课程 -->
+	<delete id="deleteChaps" parameterType="java.lang.String" >
+ 		delete from chapter_tab WHERE CHAPTER_ID = #{_parameter}
+	</delete>
+	<select id="getname" parameterType="String" resultType="String">
+		select COURSEWARE_TITLE from sys_courseware_tab where COURSEWARE_URL=#{urls}
+	</select>
+		<select id="getChapTrainByoffice" parameterType="map" resultMap="chapterTab">
+		<include refid="pageS" />
+		SELECT *
+		FROM chapter_tab where chapter_OFFICE = #{chapterOffice,jdbcType=VARCHAR} 
+		<if test="courseTypeName !=null and courseTypeName != ''">
+			and COURSE_TYPE_NAME=#{courseTypeName}
+		</if>
+		AND CHAPTER_STATER in ('已审核','审核中')
+		order by up_date desc
+		<include refid="pageE" />
+	</select>
+	<select id="countChapByoffice" parameterType="map" resultType="int">
+	SELECT
+		COUNT(*)
+		FROM
+		(
+		SELECT
+		MAX(a.up_date)
+		FROM
+		chapter_tab a
+		WHERE
+		a.chapter_stater in('已审核','审核中')
+		and a.chapter_OFFICE = #{chapterOffice,jdbcType=VARCHAR}
+		GROUP BY
+		a.course_name
+		) a 
+	</select>
+	<update id="updateJurisType" parameterType="map">
+ 	update chapter_tab set JURIS_TYPE=#{jurisType} where CHAPTER_ID = #{chapterId} 
+    </update>
+    
+    <!-- 查询峰会课程 -->
+	<select id="getFH"  resultMap="chapterTab" parameterType="map">
+		<!-- <include refid="pageS" /> -->
+		SELECT *
+	    <!-- <![CDATA[ -->
+		    FROM chapter_tab
+	    <!-- ]]> -->
+	    where COURSE_TYPE_NAME="峰会课程" and CHAPTER_STATER="已审核"
+	    <if test="courseName !=null and courseName != ''">
+			and COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		<!-- <include refid="setCondition" /> -->
+		order by UP_DATE desc
+		<!-- <include refid="pageE" /> -->
+	</select>
+	
+	
+	 <!-- 查询峰会课程 -->
+	<select id="getGK"  resultMap="chapterTab" parameterType="map">
+		SELECT *
+		    FROM chapter_tab
+	    where COURSE_TYPE_NAME="公开课程" and CHAPTER_STATER="已审核"
+	    <if test="courseName !=null and courseName != ''">
+			and COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		order by UP_DATE desc
+	</select>
+	
+	 <!-- 按照类别查询课程 -->
+	<select id="getLieBieCourse"  resultMap="chapterTab" parameterType="map">
+		SELECT *
+		    FROM chapter_tab
+	    where CHAPTER_STATER="已审核" and COURSE_TYPE_NAME != "内部课程"
+	    <if test="trainerPhone !=null and trainerPhone != ''">
+			and TRAINER_PHONE=#{trainerPhone}
+		</if>
+	    <if test="courseName !=null and courseName != ''">
+			and COURSE_NAME like CONCAT(CONCAT('%', #{courseName}), '%')
+		</if>
+		 <if test="courseTypeName !=null and courseTypeName != ''">
+			and COURSE_TYPE_NAME like CONCAT(CONCAT('%', #{courseTypeName}), '%')
+		</if> 
+		order by UP_DATE desc
+	</select>
+
+
+	<!-- 按照类别查询课程 -->
+	<select id="getTenCourse"  resultMap="chapterTab" parameterType="map">
+		SELECT *
+		FROM chapter_tab
+		where CHAPTER_STATER="已审核" and COURSE_TYPE_NAME != "内部课程"
+		order by UP_DATE desc
+		limit 1,10
+	</select>
+
+	<select id="selectLYCount" parameterType="map" resultType="int">
+		SELECT count(*) FROM chapter_tab
+		where TRAINER_PHONE=#{trainerPhone} and  COURSE_TYPE_NAME != "内部课程"
+	</select>
+	
+	<select id="selectNBCount" parameterType="map" resultType="int">
+		SELECT count(*) FROM chapter_tab
+		where TRAINER_PHONE=#{trainerPhone} and  COURSE_TYPE_NAME = "内部课程"
+	</select>
+	
+	<select id="selectNeiBu" parameterType="map" resultMap="chapterTab">
+		SELECT * FROM chapter_tab
+		where COURSE_TYPE_NAME = "内部课程"
+		<if test="trainerPhone !=null and trainerPhone != ''">
+			and TRAINER_PHONE=#{trainerPhone}
+		</if>
+		<if test="chapterOffice !=null and chapterOffice != ''">
+			and CHAPTER_OFFICE=#{chapterOffice}
+		</if>
+		<include refid="pages" />
+	</select>
+	
+	
+	
+	<!-- 查询内部课程总条数 -->
+	<select id="selectCountNeiBu" resultType="java.lang.Integer" parameterType="map">
+		select count(*) 
+		from chapter_tab
+		where COURSE_TYPE_NAME = "内部课程"
+		<if test="trainerPhone !=null and trainerPhone != ''">
+			and TRAINER_PHONE=#{trainerPhone}
+		</if>
+		<if test="chapterOffice !=null and chapterOffice != ''">
+			and CHAPTER_OFFICE=#{chapterOffice}
+		</if>
+	</select>
+	<!-- 通过用户名查询所有消息 -->
+	<!-- <select id="selectNewsByCustomId" resultMap="News" parameterType="map">
+		select *
+		from qxz_customs_news_info 
+		where custom_id = #{customId} and news_ope="0"
+		order by update_date desc
+		<include refid="pages" />
+	</select> -->
+	<sql id="pages">
+	limit #{start},#{offset}
+	</sql>
+	
+	
+	
+	<select id="selectChapterOffice" resultType="java.lang.String">
+	SELECT DISTINCT
+	CHAPTER_OFFICE
+	FROM
+		chapter_tab
+	 where CHAPTER_OFFICE is not null
+	</select>
+	
+	
+	<select id="getRecode2" parameterType="map" resultMap="chapterTab">
+		 SELECT a.CHAPTER_ID,a.IMG_URL,a.CHAPTER_NAME,a.CHAPTER_STATER,a.PROFESSIONAL_TYPE_CODE,
+		 a.PROFESSIONAL_NAME,a.COURSE_TYPE_CODE,a.COURSE_NAME,a.CHAPTER_NAME_CODE,
+		 a.CLASSS_TIME,a.TRAINER_USERID,a.TRAINER,a.TRAINER_PHONE,a.OVER_TIME,
+		 a.CHAPTER_OFFICE,a.CHAPTER_DESCRIBE,a.TEST_WAY,a.POST_ID,a.UP_DATE,
+		 a.COURSE_TYPE_NAME,a.CHAPTER_CODE,b.user_id ,b.up_NUMBER,b.previen_NUMBER,c.USER_NAME
+		 FROM chapter_tab a,sys_user_chap b ,sys_user_tab c where a.chapter_id=b.chap_id and b.user_id=c.user_id
+		 <if test="userId!=null and userId != ''">
+			and b.user_id=#{userId}
+		 </if>
+		 order by b.UP_DATE desc
+		<include refid="pages" />
+	</select>
+	
+	<select id="getRecodecount2" parameterType="map" resultType="int">
+		select count(*) from(
+		 SELECT a.CHAPTER_ID,a.CHAPTER_NAME,a.CHAPTER_STATER,a.PROFESSIONAL_TYPE_CODE,
+		 a.PROFESSIONAL_NAME,a.COURSE_TYPE_CODE,a.COURSE_NAME,a.CHAPTER_NAME_CODE,
+		 a.CLASSS_TIME,a.TRAINER_USERID,a.TRAINER,a.TRAINER_PHONE,a.OVER_TIME,
+		 a.CHAPTER_OFFICE,a.CHAPTER_DESCRIBE,a.TEST_WAY,a.POST_ID,a.UP_DATE,
+		 a.COURSE_TYPE_NAME,a.CHAPTER_CODE,b.user_id ,b.up_NUMBER,b.previen_NUMBER
+		 FROM chapter_tab a,sys_user_chap b ,sys_user_tab c where a.chapter_id=b.chap_id and b.user_id=c.user_id
+		<if test="userId!=null and userId != ''">
+			and b.user_id=#{userId}
+		 </if>
+		 order by up_number desc )c
+	</select>
+	
+</mapper>
+

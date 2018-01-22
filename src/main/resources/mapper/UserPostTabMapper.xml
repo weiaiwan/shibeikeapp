@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.UserPostDao">
+	<insert id="addUserPost" parameterType="UserPostTab">
+		insert into user_post_tab (upId,userId,postId) VALUES 
+		(#{upId,jdbcType=VARCHAR},#{userId,jdbcType=VARCHAR},#{postId,jdbcType=VARCHAR})
+	</insert>	
+	<delete id="deleteUserPostByUserId" parameterType="String">
+		 DELETE FROM user_post_tab WHERE userId = #{userId}  
+	</delete>
+	
+	<delete id="deleteUserPostByPostId" parameterType="String">
+		 DELETE FROM user_post_tab WHERE postId = #{postId}  
+	</delete>
+</mapper>
+

@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SectionDescTabDao">
+	<resultMap id="sectionDescList" type="SectionDescTab">
+			<id property="scId" column="sc_id" />
+			<result property="publisher" column="publisher" />
+			<result property="pubTime" column="pubTime" />
+			<result property="sectionsCode" column="sections_code" />
+			<result property="updateDesc" column="updateDesc" />
+			<result property="content" column="content" />
+		<association property="post" javaType="SysPostTab">
+			<id property="postId" column="POST_ID"/>
+	        <result property="postName" column="POST_NAME"/>
+	        <result property="unitCode" column="UNIT_CODE"/>
+	        <result property="unitName" column="UNIT_NAME"/>
+	        <result property="deptCode" column="DEPT_CODE"/>
+	        <result property="deptName" column="DEPT_NAME"/>
+	        <result property="postCode" column="POST_CODE"/>
+	        <result property="sections_name" column="SECTIONS_NAME"/>
+	        <result property="sections_code" column="SECTIONS_CODE"/>
+		</association>
+	</resultMap>
+			<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+	</sql> -->
+	
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+	<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	<select id="getSectionDesc" parameterType="String" resultMap="sectionDescList">
+		select s.* from sectionDesc s
+		left join sys_post_tab p on
+		p.sections_code=s.sections_code
+		left join user_post_tab up on
+		up.postId=p.post_id
+		left join sys_user_tab u on up.userId=u.user_id
+		where u.user_id=#{id} order by pubtime desc
+	</select>
+
+	<update id="updateDesc" parameterType="sectionDescTab">
+		update sectionDesc set
+		content=#{content} where sc_id=#{scId}
+	</update>
+	<insert id="addDesc" parameterType="sectionDescTab">
+		INSERT INTO sectionDesc (
+		<if test="scId !=null and scId != ''">
+			sc_id ,
+		</if>
+		<if test="publisher !=null and publisher != ''">
+			publisher,
+		</if>
+		<if test="pubTime !=null and pubTime != ''">
+			pubTime,
+		</if>
+		<if test="sectionsCode !=null and sectionsCode != ''">
+			sections_code,
+		</if>
+		<if test="updateDesc !=null and updateDesc != ''">
+			updateDesc ,
+		</if>
+		<if test="content !=null and content != ''">
+			content
+		</if>
+		) VALUES (
+		<if test="scId !=null and scId != ''">
+			#{scId,jdbcType=VARCHAR},
+		</if>
+		<if test="publisher !=null and publisher != ''">
+			#{publisher,jdbcType=VARCHAR},
+		</if>
+		<if test="pubTime !=null and pubTime != ''">
+			#{pubTime,jdbcType=DATE},
+		</if>
+		<if test="sectionsCode !=null and sectionsCode != ''">
+			#{sectionsCode,jdbcType=VARCHAR},
+		</if>
+		<if test="updateDesc !=null and updateDesc != ''">
+			#{updateDesc,jdbcType=VARCHAR},
+		</if>
+		<if test="content !=null and content != ''">
+			#{content,jdbcType=VARCHAR}
+		</if>
+		)
+	</insert>
+	<select id="countByDesc" resultType="int">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM sectionDesc 
+	    ]]>
+		<where>
+			<if test="desc.scId !=null and desc.scId != ''">
+				AND sc_id = #{desc.scId}
+			</if>
+			<if test="desc.publisher !=null and desc.publisher != ''">
+				AND publisher = #{desc.publisher}
+			</if>
+			<if test="desc.pubTime !=null and desc.pubTime != ''">
+				AND pubTime = #{desc.pubTime}
+			</if>
+			<if test="desc.sectionsCode !=null and desc.sectionsCode != ''">
+				AND sections_code = #{desc.sectionsCode}
+			</if>
+			<if test="desc.updateDesc !=null and desc.updateDesc != ''">
+				AND updateDesc = #{desc.updateDesc}
+			</if>
+			<if test="desc.content !=null and desc.content != ''">
+				AND content = #{desc.content}
+			</if>
+		</where>
+	</select>
+	<select id="getByDesc" resultMap="sectionDescList">
+		SELECT * FROM sectionDesc WHERE
+		sections_code = #{desc.sectionsCode}
+		ORDER BY pubTime DESC 
+	</select>
+	<select id="getRecord" parameterType="String" resultMap="sectionDescList">
+			SELECT
+				a.publisher,
+				a.pubTime,
+				a.sections_code,
+				a.sc_id,
+				a.updateDesc,
+				a.content,
+				b.post_id,
+				b.post_name,
+				b.sections_name,
+				b.sections_code,
+				b.unit_code,
+				b.unit_name,
+				b.dept_code,
+				b.dept_name,
+				b.post_code
+			FROM
+				sectionDesc  a
+			INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+			WHERE
+				a.sections_code = #{code}
+			ORDER BY
+				a.pubTime  DESC
+	</select>
+	<!-- 根据ID删除一条信息 -->
+	<delete id="deleteDesc" parameterType="String">
+		delete from sectionDesc where sc_id=#{id}
+	</delete>
+	<!-- 显示所有处室描述信息 -->
+	<select id="getAllSectionDescTab"  resultMap="sectionDescList">
+	<include refid="pageS" />
+		SELECT
+			Max(a.publisher) AS publisher,
+			Max(a.pubTime) AS pubTime,
+			Max(a.sections_code)AS sections_code,
+			Max(a.sc_id) AS sc_id,
+			Max(a.updateDesc)AS updateDesc,
+			Max(a.content)AS content,
+			Max(b.post_id)AS post_id,
+			Max(b.post_name)AS post_name,
+			Max(b.sections_name)AS sections_name,
+			Max(b.sections_code),
+			Max(b.unit_code)AS unit_code,
+			Max(b.unit_name)AS unit_name,
+			Max(b.dept_code)AS dept_code,
+			Max(b.dept_name)AS dept_name,
+			Max(b.post_code)AS post_code
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		<where>
+		<if test="desc.sectionsCode !=null and desc.sectionsCode != ''">
+			a.sections_code = #{desc.sectionsCode}
+		</if>
+		</where>
+		GROUP BY
+			a.sections_code
+		<include refid="pageE" />
+	</select>
+	<select id="getSection" parameterType="String" resultType="SectionDescTab">
+		select * from sectionDesc where sc_id=#{scId}
+	</select>
+	<!-- 根据处室code删除 -->
+	<delete id="delDescBysectionCode" parameterType="String">
+		DELETE FROM sectionDesc WHERE sections_code= #{sectionCode}
+	</delete>
+	
+    <!-- 办公室 -->
+	 <!--  <select id="getSectionDescbg"  resultType="String">
+		SELECT
+			content
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='办公室';
+	<select>  -->
+	
+	<!-- 人事处 -->
+    <select id="getSectionDescrsc"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='人事处'
+	</select> 
+	<!-- 办公室 -->
+    <select id="getSectionDescbg"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='办公室'
+	</select> 
+	<select id="getSectionDescfg"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='法规处'
+	</select> 
+	<select id="getSectionDescsg"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='设管处'
+	</select> 
+	<select id="getSectionDesczh"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='综合处'
+	</select> 
+	<select id="getSectionDescnc"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='农村处'
+	</select> 
+	<select id="getSectionDescgy"  resultType="SectionDescTab" parameterType="java.util.Map">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name = #{chapterOffice,jdbcType=VARCHAR}
+	</select> 
+	<select id="getSectionDescny"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='能源处'
+	</select> 
+	<select id="getSectionDesctz"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='投资处'
+	</select> 
+	<select id="getSectionDescdy"  resultType="SectionDescTab">
+			SELECT
+			*
+		    FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='调研处' order by pubTime
+	</select> 
+	<select id="getSectionDescsk"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='社科处'
+	</select> 
+	<select id="getSectionDescfwy"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='服务业处'
+	</select> 
+	<select id="getSectionDescjgdw"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='机关党委'
+	</select> 
+	<select id="getSectionDescrk"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='人口处'
+	</select> 
+	<select id="getSectionDescpdzx"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='普查调查中心'
+	</select> 
+	<select id="getSectionDesczxzx"  resultType="SectionDescTab">
+			SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='咨询中心'
+	</select> 
+	
+	<!-- 监察室 -->
+	<select id="getSectionDescjcs"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='监察室'
+	</select>
+	<!-- 教育中心 -->
+	<select id="getSectionDescjyzx"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='教育中心'
+	</select>
+	<!-- 大数据中心 -->
+	<select id="getSectionDescdsjzrs"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='大数据中心'
+	</select>
+	<!-- 贸外处 -->
+	<select id="getSectionDescmwc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='贸外处'
+	</select>
+	<!-- 大数据中心数据处 -->
+	<select id="getSectionDescdsjsjc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='大数据中心数据处'
+	</select>
+	<!-- 大数据中心监测处 -->
+	<select id="getSectionDescdsjjcc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='大数据中心监测处'
+	</select>
+	<!-- 大数据中心运行处 -->
+	<select id="getSectionDescdsjyxc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='大数据中心运行处'
+	</select>
+	<!-- 大数据中心应用服务处 -->
+	<select id="getSectionDescdsjfwc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='大数据中心应用服务处'
+	</select>
+	<!-- 普调中心主任室 -->
+	<select id="getSectionDescpdzrs"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='普调中心主任室'
+	</select>
+	<!-- 普调中心城乡调查处 -->
+	<select id="getSectionDescpddcc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='普调中心城乡调查处'
+	</select>
+	<!-- 普调中心社情民意处 -->
+	<select id="getSectionDescpdsqmyc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='普调中心社情民意处'
+	</select>
+	<!-- 普调中心名录处 -->
+	<select id="getSectionDescpdmlc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='普调中心名录处'
+	</select>
+	<!-- 普调中心普查处 -->
+	<select id="getSectionDescpdpcc"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='普调中心普查处'
+	</select>
+	<!-- 两总师 -->
+	<select id="getSectionDesclzs"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='两总师'
+	</select>
+	<!-- 信息中心 -->
+	<select id="getSectionDescxx"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='信息中心'
+	</select>
+	<!-- 国核处 -->
+	<select id="getSectionDescgh"  resultType="SectionDescTab">
+		SELECT
+			*
+		FROM
+			sectionDesc  a
+		INNER JOIN sys_post_tab  b ON a.sections_code = b.sections_code
+		and b.sections_name='国核处'
+	</select>
+</mapper>

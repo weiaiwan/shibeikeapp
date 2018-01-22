@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.ExpertLectureDao">
+	<resultMap id="expertLecture" type="ExpertLecture">
+		<result property="id" column="ID" />
+		<result property="expertName" column="EXPERT_NAME" />
+		<result property="lectureTitle" column="LECTURE_TITLE" />
+		<result property="upDate" column="UP_DATE" />
+		<result property="fileType" column="FILE_TYPE" />
+		<result property="downLoadUrl" column="DOWNLOAD_URL" />
+		<result property="contantDescribe" column="CONTANT_DESCRIBE" />
+	</resultMap>
+	
+	<!-- 分页开始 -->
+	<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+
+	</sql> -->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	<!-- 查看专家讲座 -->
+	<select id="getLecture" resultMap="expertLecture" parameterType="java.util.Map">
+		<include refid="pageS" />
+		select * from EXPERTlEC_TAB order by UP_DATE desc
+		<include refid="pageE" />
+	</select>
+	<select id="getCount" resultType="int">
+		select count(*) from EXPERTlEC_TAB 
+	</select>
+	<!-- 根据ID查看详情 -->
+	<select id="getLectureById" parameterType="String" resultMap="expertLecture">
+		select * from EXPERTlEC_TAB where ID=#{id, jdbcType=VARCHAR} 
+	</select>
+	
+
+	<!-- 添加专家讲座视频 -->
+	<insert id="AddLecture" parameterType="expertLecture">
+		INSERT INTO EXPERTlEC_TAB 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			ID ,
+		<if test="expertName !=null and expertName != ''">
+			EXPERT_NAME ,
+		</if>
+		<if test="lectureTitle !=null and lectureTitle != ''">
+			LECTURE_TITLE ,
+		</if>
+		<if test="upDate !=null and upDate != ''">
+			UP_DATE ,
+		</if>
+		<if test="fileType !=null and fileType != ''">
+			FILE_TYPE ,
+		</if>
+		<if test="downLoadUrl !=null and downLoadUrl != ''">
+			DOWNLOAD_URL ,
+		</if>
+		<if test="contantDescribe !=null and contantDescribe != ''">
+			CONTANT_DESCRIBE ,
+		</if>
+		 </trim>
+   		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{id, jdbcType=VARCHAR} ,
+		<if test="expertName !=null and expertName != ''">
+			#{expertName, jdbcType=VARCHAR} ,
+		</if>
+		<if test="lectureTitle !=null and lectureTitle != ''">
+			#{lectureTitle, jdbcType=VARCHAR} ,
+		</if>
+		<if test="upDate !=null and upDate != ''">
+			#{upDate, jdbcType=VARCHAR} ,
+		</if>
+		<if test="fileType !=null and fileType != ''">
+			#{fileType, jdbcType=VARCHAR} ,
+		</if>
+		<if test="downLoadUrl !=null and downLoadUrl != ''">
+			#{downLoadUrl, jdbcType=VARCHAR} ,
+		</if>
+		<if test="contantDescribe !=null and contantDescribe != ''">
+			#{contantDescribe, jdbcType=VARCHAR} ,
+		</if>
+		</trim>
+	</insert>
+	
+	<!-- 修改专家讲座视频 -->
+	<update id="updateLecture" parameterType="expertLecture">
+		UPDATE EXPERTlEC_TAB
+		 <set>
+		<if test="expertName !=null and expertName != ''">
+			EXPERT_NAME=#{expertName, jdbcType=VARCHAR},
+		</if>
+		<if test="lectureTitle !=null and lectureTitle != ''">
+			LECTURE_TITLE=#{lectureTitle, jdbcType=VARCHAR},
+		</if>
+		<if test="upDate !=null and upDate != ''">
+			UP_DATE=#{upDate, jdbcType=VARCHAR},
+		</if>
+		<if test="fileType !=null and fileType != ''">
+			FILE_TYPE=#{fileType, jdbcType=VARCHAR},
+		</if>
+		<if test="downLoadUrl !=null and downLoadUrl != ''">
+			DOWNLOAD_URL=#{downLoadUrl, jdbcType=VARCHAR},
+		</if>
+		<if test="contantDescribe !=null and contantDescribe != ''">
+			CONTANT_DESCRIBE=#{contantDescribe, jdbcType=VARCHAR}
+		</if>
+		</set>
+		WHERE
+		ID=#{id}
+	</update>
+	
+	<!-- 删除专家讲座，通过ID -->
+	<delete id="deleteLecture" parameterType="java.lang.String" >
+ 		delete from EXPERTlEC_TAB WHERE ID = #{id}
+	</delete>
+	
+</mapper>
+

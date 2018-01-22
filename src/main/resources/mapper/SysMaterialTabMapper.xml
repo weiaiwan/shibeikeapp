@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.SysTrainMaterialTabDao">
+
+	<resultMap id="MaterialList" type="SysTrainMaterialTab">
+        <result property="trainMaterialId" column="TRAINMATERIAL_ID"/>
+        <result property="trainMaterialTitle" column="TRAINMATERIAL_TITLE"/>
+        <result property="trainMaterialTime" column="TRAINMATERIAL_TIME"/>
+         <result property="trainMaterialUrl" column="TRAINMATERIAL_URL"/>
+         <result property="fileName" column="MATERIAL_FIELNAME"/>
+        
+         
+	</resultMap>
+	<select id="getMaterial" resultMap="MaterialList">
+		SELECT *
+	    <![CDATA[
+		    FROM  sys_trainMaterial_tab
+	    ]]>
+	</select>
+	<select id="getCount" resultType="int" >
+		SELECT count(*) 
+	    <![CDATA[
+		    FROM sys_trainMaterial_tab 
+	    ]]>
+	</select>
+	<select id="getUrlByTrainMaterialId" parameterType="String" resultType="String" >
+		SELECT TRAINMATERIAL_URL 
+	    <![CDATA[
+		    FROM sys_trainMaterial_tab where TRAINMATERIAL_ID=#{trainMaterial_id}
+	    ]]>
+	</select>
+	<select id="getFileNameByTrainMaterialId" parameterType="String" resultType="String" >
+		SELECT material_fileName 
+	    <![CDATA[
+		    FROM sys_trainMaterial_tab where TRAINMATERIAL_ID=#{trainMaterial_id}
+	    ]]>
+	</select>
+	
+</mapper>

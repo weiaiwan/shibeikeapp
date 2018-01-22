@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.LogsDao" >
+  <resultMap id="logsList" type="Logs" >
+    <result column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="userid" property="userid" jdbcType="VARCHAR" />
+    <result column="userName" property="userName" jdbcType="VARCHAR" />
+    <result column="operatetype" property="operatetype" jdbcType="VARCHAR"/>
+    <result column="operatetObject" property="operatetObject" />
+    <result column="OPERATETIME" property="time" />
+    <result column="IP_ADDRESS" property="ipAddr" />
+  </resultMap>
+  
+  <!-- 分页开始 
+	<sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql>-->
+	<!-- 分页结束 
+	<sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+
+	</sql>-->
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+  <insert id="addLog" parameterType="Logs" >
+  	INSERT INTO xn_logs(
+  	<trim suffixOverrides="," >
+  		<if test="id != null and id != ''">
+		  	ID,
+  		</if>
+  		<if test="userid != null and userid != ''">
+		  	USERID,
+  		</if>
+  		<if test="userName != null and userName != ''">
+		  	USERNAME,
+  		</if>
+  		<if test="operatetype != null and operatetype != ''">
+		  	OPERATETYPE,
+  		</if>
+  		<if test="operatetObject != null and operatetObject != ''">
+		  	OPERATEOBJECT,
+  		</if>
+  		<if test="time != null ">
+		  	OPERATETIME,
+  		</if>
+  		<if test="ipAddr != null and ipAddr != ''">
+		  	IP_ADDRESS,
+  		</if>
+  	</trim>
+  	)VALUES(
+  		<trim suffixOverrides="," >
+	  		<if test="id != null and id != ''">
+			  	#{id},
+	  		</if>
+	  		<if test="userid != null and userid != ''">
+			  	#{userid},
+	  		</if>
+	  		<if test="userName != null and userName != ''">
+			  	#{userName},
+	  		</if>
+	  		<if test="operatetype != null and operatetype != ''">
+			  	#{operatetype},
+	  		</if>
+	  		<if test="operatetObject != null and operatetObject != ''">
+			  	#{operatetObject},
+	  		</if>
+	  		<if test="time != null">
+			  	#{time},
+	  		</if>
+	  		<if test="ipAddr != null and ipAddr != ''">
+			  	#{ipAddr},
+	  		</if>
+	  	</trim>
+  	)
+  </insert>
+  <select id="getLogs" resultMap="logsList" >
+  <include refid="pageS" />
+  	SELECT * FROM xn_logs 
+  	<where>
+  		<if test="startTime != null and startTime !=''">
+  			AND OPERATETIME &gt; #{startTime}
+  		</if>
+  		<if test="endTime != null and endTime != ''">
+  			AND	OPERATETIME &lt; #{endTime}
+  		</if>
+  		<if test="userName != null and userName != ''">
+			AND USERNAME LIKE #{userName}
+	  	</if>
+	  	<if test="operatetype != null and operatetype != ''">
+			AND operatetype LIKE #{operatetype}
+	  	</if>
+  	</where>
+  	ORDER BY OPERATETIME DESC
+  	<include refid="pageE" />
+  </select>
+  <select id="getCount" resultType="java.lang.Integer" >
+  	SELECT count(id) FROM xn_logs
+  	<where>
+  		<if test="startTime != null and startTime != ''">
+  			AND OPERATETIME &gt; #{startTime}
+  		</if>
+  		<if test="endTime != null and endTime != ''">
+  			AND	OPERATETIME &lt; #{endTime}
+  		</if>
+  		<if test="userName != null and userName != ''">
+			AND USERNAME LIKE #{userName}
+	  	</if>
+	  	<if test="operatetype != null and operatetype != ''">
+			AND operatetype LIKE #{operatetype}
+	  	</if>
+  	</where>
+  </select>
+</mapper>

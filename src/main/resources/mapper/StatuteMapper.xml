@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.StatuteDao">
+	<resultMap id="staList" type="Statute">
+		<result property="staId" column="STA_ID" />
+		<result property="staDesc" column="STA_DESC" />
+	</resultMap>
+	
+	<update id="updateSta" parameterType="Statute">
+            UPDATE STATUTE SET			
+			<if test="staDesc !=null and staDesc != ''">
+	        STA_DESC = #{staDesc, jdbcType=VARCHAR}
+			</if> where STA_ID =  #{staId, jdbcType=VARCHAR}
+	</update>
+	
+	<insert id="insertSta" parameterType="Statute">
+		 INSERT INTO STATUTE (
+			<if test="staId !=null and staId != ''">
+        	STA_ID ,	
+			</if>
+			<if test="staDesc !=null and staDesc != ''">
+			STA_DESC
+			</if>
+        ) VALUES (
+			<if test="staId !=null and staId != ''">
+        	#{staId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="staDesc !=null and staDesc != ''">
+        	#{staDesc, jdbcType=VARCHAR}
+			</if>
+        )
+	</insert>
+	<select id="getStaDesc"  resultMap="staList" parameterType="String">
+	  select * from STATUTE 
+	</select> 
+</mapper>
+

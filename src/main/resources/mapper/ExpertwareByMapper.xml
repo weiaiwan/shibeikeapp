@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.ExpertwareDao">
+	<resultMap id="expertwareTab" type="ExpertwareTab">
+        <result property="expertwareTitle" column="EXPERTWARE_TITLE"/>
+        <result property="expertwareUrl" column="EXPERTWARE_URL"/>
+        <result property="id" column="ID"/>
+        <result property="expertwareId" column="EXPERTWARE_ID"/>
+	</resultMap>
+	
+	<insert id="AddLec" parameterType="expertwareTab" >
+       insert into SYS_EXPERTWARE_TAB 
+       <trim prefix="(" suffix=")" suffixOverrides=",">
+			EXPERTWARE_ID,
+			<if test="expertwareTitle !=null and expertwareTitle !=''">
+        	EXPERTWARE_TITLE,	
+			</if>
+			<if test="expertwareUrl !=null and expertwareUrl !=''">
+        	EXPERTWARE_URL,	
+			</if>
+			<if test="id !=null and id !=''">
+        	ID,
+			</if>
+         </trim>
+   		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{expertwareId, jdbcType=VARCHAR},
+			<if test="expertwareTitle !=null and expertwareTitle !=''">
+        	#{expertwareTitle, jdbcType=VARCHAR},	
+			</if>
+			<if test="expertwareUrl !=null and expertwareUrl !=''">
+        	#{expertwareUrl, jdbcType=VARCHAR},	
+        	</if>
+        	<if test="id !=null and id !=''">
+        	#{id, jdbcType=VARCHAR},
+			</if>
+       </trim>
+	</insert>
+	<select id="getLectById" parameterType="String" resultMap="expertwareTab">
+		select * from SYS_EXPERTWARE_TAB where id=#{id}
+	</select>
+	<delete id="delLec" parameterType="String">
+	delete from SYS_EXPERTWARE_TAB where EXPERTWARE_ID=#{expertwareId}
+	</delete>
+	
+	<select id="getname" parameterType="String" resultType="String">
+		select EXPERTWARE_TITLE from SYS_EXPERTWARE_TAB where EXPERTWARE_URL=#{expertwareUrl}
+	</select>
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.PuserPaperDao">
+	<resultMap id="puserPaper" type="PuserPaper">
+		<id property="userPaperId" column="USER_PAPER_ID" />
+		<result property="userId" column="USER_ID" />
+		<result property="paperId" column="PAPER_ID" />
+		<result property="state" column="STATE" />
+		<result property="overTime" column="OVER_TIME" />
+		<result property="startTime" column="START_TIME" />
+		<result property="userCode" column="USER_CODE" />
+		<result property="userName" column="USER_NAME" />
+		<result property="paperScore" column="PAPER_SCORE" />
+		<result property="examNum" column="EXAM_NUM" />
+	</resultMap>
+	<insert id="AddPuserPaper" parameterType="PuserPaper">
+		 INSERT INTO p_user_paper (
+				USER_PAPER_ID,
+				USER_ID ,
+				PAPER_ID ,
+				USER_NAME,
+				PAPER_SCORE,
+				OVER_TIME,
+				EXAM_NUM
+		        ) VALUES (
+      			#{userPaperId},
+				#{userId} ,
+				#{paperId} ,
+				#{userName},
+				#{paperScore},
+				#{overTime},
+				#{examNum}
+		  )
+	</insert>
+	<update id="updatePuserPaper" parameterType="PuserPaper">
+		     UPDATE p_user_paper SET
+				USER_ID=#{userId} ,
+				PAPER_ID=#{paperId} ,
+				USER_NAME=#{userName},
+				PAPER_SCORE=#{paperScore}
+        WHERE 
+	       USER_PAPER_ID =#{userPaperId}
+	</update>
+	<select id="getuserPaper" resultMap="puserPaper" parameterType="map">
+		select * from p_user_paper where USER_ID=#{userId} and PAPER_ID=#{paperId}
+	</select>
+	
+	<select id="getuserPapercount" resultType="int" parameterType="map">
+		select count(*) from p_user_paper where USER_ID=#{userId} and PAPER_ID=#{paperId}
+	</select>
+	
+	<delete id="delUserPaper" parameterType="string">
+	   delete from P_USER_PAPER where PAPER_ID=#{paperId}
+	</delete>
+	<!-- 删除审核试卷 -->
+	<delete id="delUserPapers" parameterType="java.lang.String" >
+ 		delete from P_USER_PAPER WHERE PAPER_ID = #{_parameter}
+	</delete>
+    <select id="newgetuserPaper" resultType="int" parameterType="map">
+		select max(paper_score) from p_user_paper where USER_ID=#{userId} and PAPER_ID=#{paperId}
+	</select>
+	</mapper>

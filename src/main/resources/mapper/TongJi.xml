@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.TongJiDao">
+	<resultMap id="post" type="SysPostTab">
+        <result property="postId" column="POST_ID"/>
+        <result property="postName" column="POST_NAME"/>
+        <result property="unitCode" column="UNIT_CODE"/>
+        <result property="unitName" column="UNIT_NAME"/>
+        <result property="deptCode" column="DEPT_CODE"/>
+        <result property="deptName" column="DEPT_NAME"/>
+        <result property="postCode" column="POST_CODE"/>
+        <result property="sections_name" column="SECTIONS_NAME"/>
+        <result property="sections_code" column="SECTIONS_CODE"/>
+        <result property="cityBureau" column="cityBureau"/>
+        <result property="actualNum" column="ACTUAL_NUM"/>
+        <result property="joinNum" column="JOIN_NUM"/>
+        <result property="niceRate" column="NICE_RATE"/>
+        <result property="goodRate" column="GOOD_RATE"/>
+	</resultMap>
+	<resultMap id="paper" type="PpaperTab">
+        <result property="paperId" column="PAPER_ID"/>
+        <result property="paperDesc" column="PAPER_DESC"/>
+        <result property="overTime" column="OVER_TIME"/>
+        <result property="startTime" column="START_TIME"/>
+        <result property="paperCode" column="PAPER_CODE"/>
+        <result property="paperName" column="PAPER_NAME"/>
+        <result property="postId" column="POST_ID"/>
+        <result property="paperImgUrl" column="PAPER_IMG_URL"/>
+		<result property="paperLevel" column="PAPER_LEVEL"/>
+		<result property="officeName" column="OFFICE_NAME"/>
+		<result property="paperMaker" column="PAPER_MAKER"/>
+		<result property="makerPhone" column="MAKER_PHONE"/>
+		<result property="paperStater" column="PAPER_STATER"/>
+		<result property="paperGrade" column="PAPER_GRADE"/>
+		<result property="gradeGood" column="GRADE_GOOD"/>
+		<result property="gradeNice" column="GRADE_NICE"/>
+		<result property="paperType" column="PAPER_TYPE"/>
+		
+	</resultMap>
+	
+	<!-- 查询出市局下所有的处室名字     作为统计查询的x轴 -->
+	<select id="getAllChapter" resultType="String">
+		SELECT sections_name
+	    <![CDATA[
+		    FROM sys_post_tab where cityBureau='1'
+	    ]]>
+	</select>
+	<!-- 查询出非市局下的所有单位名称    作为统计查询的x轴 -->
+	<select id="getAllUnit" resultType="String">
+		SELECT unit_name
+	    <![CDATA[
+		    FROM sys_post_tab where cityBureau='0'
+	    ]]>
+	</select>
+	<!-- 根据paperId查询出所有优秀的userId -->
+	<select id="getGoodUserIdByPaperId" resultType="String" parameterType="String">
+		SELECT user_id
+	    <![CDATA[
+		    FROM p_user_paper where paper_id=#{paperId} and paper_score>=(select grade_good from p_paper_tab where paper_id=#{paperId})
+	    ]]>
+	</select>
+	<!-- 根据paperId查询出所有良好的userId -->
+	<select id="getNiceUserIdByPaperId" resultType="String" parameterType="String">
+		SELECT user_id
+	    <![CDATA[
+		    FROM p_user_paper where paper_id=#{paperId} and paper_score>=(select grade_nice from p_paper_tab where paper_id=#{paperId}) and paper_score<(select grade_good from p_paper_tab where paper_id=#{paperId})
+	    ]]>
+	</select>
+	<!-- 根据userId查询出该用户的市局，处室，单位等情况 -->
+	<select id="getUserConditionByUserId" resultMap="post" parameterType="String">
+		SELECT POST_NAME,UNIT_CODE,UNIT_NAME,DEPT_CODE,DEPT_NAME,POST_CODE,SECTIONS_NAME,SECTIONS_CODE,cityBureau
+	    <![CDATA[
+		    FROM sys_post_tab where post_id=(select postId from user_post_tab where userId=#{userId})
+	    ]]>
+	</select>
+	
+	
+	<!-- 根据试卷id查询出试卷信息 -->
+	<select id="getPaperInfoByPaperId" resultMap="paper" parameterType="String">
+		SELECT PAPER_DESC,OVER_TIME,START_TIME,PAPER_CODE,PAPER_NAME,POST_ID,PAPER_IMG_URL,PAPER_LEVEL,OFFICE_NAME,PAPER_MAKER,MAKER_PHONE,PAPER_STATER,PAPER_GRADE,GRADE_GOOD,GRADE_NICE,PAPER_TYPE
+	    <![CDATA[
+		    FROM p_paper_tab where paper_id=#{paperId} 
+	    ]]>
+	</select>
+	<!-- 根据试卷id查询出参加考试的人数 -->
+	<select id="getJoinNumByPaperId" resultType="int" parameterType="String">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM p_user_paper where paper_id=#{paperId} 
+	    ]]>
+	</select>
+	<!-- 根据试卷id查询出参加考试人中通过的人数 -->
+	<select id="getPassNumByPaperId" resultType="int" parameterType="String">
+		SELECT count(*)
+	    <![CDATA[
+		    FROM p_user_paper where paper_id=#{paperId} and paper_score>=(select grade_nice from p_paper_tab where paper_id=#{paperId})
+	    ]]>
+	</select>
+	<!-- 得到所有的单位处室名字 -->
+	<select id="getUnitSection" resultType="SysPostTab" >
+		SELECT POST_NAME,UNIT_CODE as unitCode,unit_name as unitName,DEPT_CODE,DEPT_NAME,POST_CODE,SECTIONS_NAME,SECTIONS_CODE,cityBureau
+		    FROM sys_post_tab 
+	</select>
+	<!-- 得到具体单位处室参加考试得到优秀的人数 -->
+	<select id="getNumYx" resultType="int" parameterType="map">
+		SELECT count(*) FROM sys_post_tab where post_id in
+        (select postId from user_post_tab where userId in 
+        (SELECT user_id
+		FROM p_user_paper where paper_id=#{paperId,jdbcType=VARCHAR}
+         and paper_score>=
+        (select grade_good from p_paper_tab where paper_id=#{paperId,jdbcType=VARCHAR}))
+         ) and
+         unit_code=#{unitCode,jdbcType=VARCHAR} 
+      <if test="sections_code !=null and sections_code != ''">
+		 and sections_code= #{sections_code,jdbcType=VARCHAR} 
+	  </if>
+	</select>
+		<!-- 得到具体单位处室参加考试得到良好的人数 -->
+	<select id="getNumLh" resultType="int" parameterType="map">
+		SELECT count(*) FROM sys_post_tab where post_id in
+        (select postId from user_post_tab where userId in 
+        (SELECT user_id
+         FROM p_user_paper where paper_id=#{paperId,jdbcType=VARCHAR} 
+         and paper_score>=
+        (select grade_nice from p_paper_tab where paper_id=#{paperId,jdbcType=VARCHAR}) 
+        )
+         ) and  unit_code=#{unitCode,jdbcType=VARCHAR} 
+      <if test="sections_code !=null and sections_code != ''">
+		 and sections_code= #{sections_code,jdbcType=VARCHAR} 
+	  </if>
+	</select>
+	<!-- 根据试卷id查询出具体处室参加考试的人数 -->
+	<select id="getJoinNum" resultType="int" parameterType="map">
+		SELECT count(*)
+		    FROM sys_post_tab where post_id in
+        (select postId from user_post_tab where userId in 
+        (SELECT user_id
+		 FROM p_user_paper where paper_id=#{paperId})) and
+         sections_code=#{sections_code} 
+         and cityBureau=#{cityBureau}
+	</select>
+	<select id="getJoinNum1" resultType="int" parameterType="map">
+		SELECT count(*)
+	    FROM sys_post_tab where post_id in
+        (select postId from user_post_tab where userId in 
+        (SELECT user_id
+		 FROM p_user_paper where paper_id=#{paperId})) and
+         unit_code=#{unitCode} 
+            <if test="sections_code !=null and sections_code != ''">
+				and sections_code= #{sections_code} 
+			</if>
+	</select>
+	<select id="getJoinNumAll" resultType="int" parameterType="map">
+	 SELECT count(*)
+		    FROM  sys_post_tab b left join 
+		    user_post_tab a on a.postid = b.post_id 
+            where b.sections_code= #{sections_code} 
+            and cityBureau=#{cityBureau} 
+     </select>
+     <select id="getUnitSectionNum" resultType="int" parameterType="map">
+	        SELECT count(*)
+		    FROM  sys_post_tab b join 
+		    user_post_tab a on a.postid = b.post_id 
+            where  unit_code=#{unitCode} 
+            <if test="sections_code !=null and sections_code != ''">
+				and b.sections_code= #{sections_code} 
+			</if>
+     </select>
+     <!-- 获得更改后的考试情况 -->
+     <select id="getUnitSectionzh" resultMap="post" >
+		SELECT * FROM sys_post_tab 
+	</select>
+	<!-- 得到一个单位处室所有人员的userId -->
+	<select id="getUnitAlluserId" resultType="map" parameterType="map">
+		 select a.userid from
+		 sys_post_tab b join 
+		 user_post_tab a on a.postid = b.post_id 
+         where  b.unit_code=#{unitCode} 
+         <if test="sections_code !=null and sections_code != ''">
+ 		 and b.sections_code= #{sections_code} 
+	     </if>
+     </select>
+     <!-- 得到一个单位处室参加该套试卷考试的所有人员的userId -->
+	<select id="getUnitKsuserId" resultType="map" parameterType="map">
+		 select c.userid from
+         (select a.*,b.* from
+		 sys_post_tab b right join 
+		 user_post_tab a on a.postid = b.post_id 
+         where  b.unit_code=#{unitCode} 
+         <if test="sections_code !=null and sections_code != ''">
+ 		 and b.sections_code= #{sections_code} 
+	     </if>
+         ) c right join
+	     p_user_paper d on paper_id=#{paperId} and c.userid
+         = d.user_id group by c.userid
+     </select>
+	</mapper>

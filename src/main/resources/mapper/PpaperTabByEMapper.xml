@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.PpaperTabDao">
+
+	<resultMap id="paperTab" type="PpaperTab">
+        <result property="paperId" column="PAPER_ID"/>
+        <result property="paperDesc" column="PAPER_DESC"/>
+        <result property="overTime" column="OVER_TIME"/>
+        <result property="startTime" column="START_TIME"/>
+        <result property="paperCode" column="PAPER_CODE"/>
+        <result property="paperName" column="PAPER_NAME"/>
+        <result property="postId" column="POST_ID"/>
+        <result property="paperImgUrl" column="PAPER_IMG_URL"/>
+		<result property="paperLevel" column="PAPER_LEVEL"/>
+		<result property="officeName" column="OFFICE_NAME"/>
+		<result property="paperMaker" column="PAPER_MAKER"/>
+		<result property="makerPhone" column="MAKER_PHONE"/>
+		<result property="paperStater" column="PAPER_STATER"/>
+		<result property="paperGrade" column="PAPER_GRADE"/>
+		<result property="gradeGood" column="GRADE_GOOD"/>
+		<result property="gradeNice" column="GRADE_NICE"/>
+		<result property="trainerUserId" column="TRAINER_USERID" />
+		<result property="upDate" column="UP_DATE" />
+		<result property="paperType" column="paper_type" />
+		<result property="pcType" column="PC_TYPE" />
+		<result property="pjurisType" column="PJURIS_TYPE" />
+	</resultMap>
+<!-- <sql id="pageS">
+		SELECT *
+		FROM (SELECT M.*, ROWNUM RN
+		FROM (
+
+	</sql> -->
+	<!-- 分页结束 -->
+	<!-- <sql id="pageE">
+		) M
+		WHERE ROWNUM &lt;= #{offset})
+		WHERE RN >= #{pageSize}
+
+	</sql> -->
+	
+	<sql id="pageS">
+		select c.* from (
+        select b.* from 
+        (select @rownum :=@rownum + 1 AS rm,a.* from 
+		(SELECT @rownum := 0) r,
+		(
+	</sql>
+
+	<sql id="pageE">
+	    ) a ) b where b.rm &lt;= #{offset}) c where c.rm >= #{pageSize}
+	</sql>
+	
+	
+	<insert id="savePager"  parameterType="PpaperTab">
+        INSERT INTO p_paper_tab (
+			<if test="paperDesc!=null and paperDesc !=''">
+        	PAPER_DESC ,	
+			</if>
+			<if test="overTime!=null and overTime !=''">
+        	OVER_TIME ,	
+			</if>
+			<if test="startTime!=null and startTime !=''">
+        	START_TIME ,	
+			</if>
+			<if test="paperCode!=null and paperCode !=''">
+        	PAPER_CODE ,	
+			</if>
+			<if test="paperName!=null and paperName !=''">
+        	PAPER_NAME ,	
+			</if>
+			<if test="postId!=null and postId !=''">
+        	POST_ID ,	
+			</if>
+			<if test="paperImgUrl!=null and paperImgUrl !=''">
+        	PAPER_IMG_URL,
+			</if>
+			<if test="paperLevel !=null and paperLevel !=''">
+        	PAPER_LEVEL,
+			</if>
+			<if test="officeName !=null and officeName !=''">
+        	OFFICE_NAME ,
+			</if>
+			<if test="paperMaker !=null and paperMaker !=''">
+        	PAPER_MAKER ,	
+			</if>
+			<if test="makerPhone !=null and makerPhone !=''">
+        	MAKER_PHONE ,	
+			</if>
+			<if test="paperStater !=null and paperStater !=''">
+        	PAPER_STATER,	
+			</if>
+			<if test="paperGrade !=null and paperGrade !=''">
+        	PAPER_GRADE,	
+			</if>
+			<if test="gradeGood !=null and gradeGood !=''">
+        	GRADE_GOOD,	
+			</if>
+			<if test="gradeNice !=null and gradeNice !=''">
+        	GRADE_NICE,	
+			</if>
+			<if test="trainerUserId !=null and trainerUserId !=''">
+        	TRAINER_USERID,	
+			</if>
+			<if test="upDate !=null and upDate !=''">
+        	UP_DATE,	
+			</if>
+			<if test="paperType !=null and paperType !=''">
+        	paper_type,	
+			</if>
+			<if test="pcType !=null and pcType !=''">
+        	PC_TYPE,	
+			</if>
+        	PAPER_ID 
+        ) VALUES (
+			<if test="paperDesc!=null and paperDesc !=''">
+        	#{paperDesc, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="overTime!=null and overTime !=''">
+        	#{overTime, jdbcType=TIMESTAMP} ,	
+			</if>
+			<if test="startTime!=null and startTime !=''">
+        	#{startTime, jdbcType=TIMESTAMP} ,	
+			</if>
+			<if test="paperCode!=null and paperCode !=''">
+        	#{paperCode, jdbcType=VARCHAR} ,	
+			</if>
+			<if  test="paperName!=null and paperName !=''">
+        	#{paperName, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="postId!=null and postId !=''">
+        	#{postId, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="paperImgUrl!=null and paperImgUrl !=''">
+        	#{paperImgUrl, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="paperLevel !=null and paperLevel !=''">
+        	#{paperLevel, jdbcType=VARCHAR} , 	
+			</if>
+			<if test="officeName !=null and officeName !=''">
+        	#{officeName, jdbcType=VARCHAR} , 	
+			</if>
+			<if test="paperMaker !=null and paperMaker !=''">
+        	#{paperMaker, jdbcType=VARCHAR} , 	
+			</if>
+			<if test="makerPhone !=null and makerPhone !=''">
+        	#{makerPhone, jdbcType=VARCHAR} , 	
+			</if>
+			<if test="paperStater !=null and paperStater !=''">
+        	#{paperStater, jdbcType=VARCHAR},
+			</if>
+			<if test="paperGrade !=null and paperGrade !=''">
+        	#{paperGrade},	
+			</if>
+			<if test="gradeGood !=null and gradeGood !=''">
+        	#{gradeGood},
+			</if>
+			<if test="gradeNice !=null and gradeNice !=''">
+        	#{gradeNice},
+			</if>
+			<if test="trainerUserId !=null and trainerUserId !=''">
+        	#{trainerUserId},	
+			</if>
+				<if test="upDate !=null and upDate !=''">
+        	#{upDate},	
+			</if>
+			<if test="paperType !=null and paperType !=''">
+        	#{paperType},	
+			</if>
+			<if test="pcType !=null and pcType !=''">
+        	#{pcType},	
+			</if>
+        	#{paperId, jdbcType=VARCHAR}
+        )
+		<!--	
+			oracle: order="BEFORE" SELECT sequenceName.nextval AS ID FROM DUAL 
+			DB2: order="BEFORE"" values nextval for sequenceName
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="userId">
+			SELECT sequenceName.nextval AS ID FROM DUAL 
+        </selectKey>
+		-->
+	</insert>
+    <update id="updatePaper" parameterType="PpaperTab">
+    	 UPDATE p_paper_tab SET
+    	 	<if test="paperDesc !=null and paperDesc !=''">
+        	PAPER_DESC=#{paperDesc, jdbcType=VARCHAR} ,	
+			</if>
+			<if test="overTime !=null and overTime !=''">
+        	OVER_TIME=#{overTime},	
+			</if>
+			<if test="startTime !=null and startTime !=''">
+        	START_TIME=#{startTime},	
+			</if>
+			<if test="paperCode !=null and paperCode !=''">
+        	PAPER_CODE=#{paperCode},	
+			</if>
+			<if test="paperName !=null and paperName !=''">
+        	PAPER_NAME=#{paperName},	
+			</if>
+			<if test="postId !=null and postId !=''">
+        	POST_ID=#{postId},	
+			</if>
+			<if test="paperImgUrl !=null and paperImgUrl !=''">
+        	PAPER_IMG_URL=#{paperImgUrl},
+			</if>
+			<if test="paperLevel !=null and paperLevel !=''">
+        	PAPER_LEVEL=#{paperLevel},
+			</if>
+			<if test="officeName !=null and officeName !=''">
+        	OFFICE_NAME=#{officeName},
+			</if>
+			<if test="paperMaker !=null and paperMaker !=''">
+        	PAPER_MAKER=#{paperMaker},	
+			</if>
+			<if test="makerPhone !=null and makerPhone !=''">
+        	MAKER_PHONE=#{makerPhone},	
+			</if>
+			<if test="paperGrade !=null and paperGrade !=''">
+        	PAPER_GRADE=#{paperGrade},	
+			</if>
+			<if test="gradeGood !=null and gradeGood !=''">
+        	GRADE_GOOD=#{gradeGood},	
+			</if>
+			<if test="gradeNice !=null and gradeNice !=''">
+        	GRADE_NICE=#{gradeNice},	
+			</if>
+			<if test="upDate !=null and upDate !=''">
+        	UP_DATE=#{upDate},	
+			</if>
+			<if test="trainerUserId !=null and trainerUserId !=''">
+        	TRAINER_USERID=#{trainerUserId},	
+			</if>
+			<if test="paperType !=null and paperType !=''">
+        	paper_type=#{paperType},	
+			</if>
+			<if test="pcType !=null and pcType !=''">
+        	PC_TYPE=#{pcType},	
+			</if>
+        	PAPER_STATER=#{paperStater}
+        WHERE 
+	       PAPER_ID=#{paperId}
+    
+    </update>
+    <update id="updatePapergrade"  parameterType="map" >
+    	 UPDATE p_paper_tab SET
+			<if test="paperGrade !=null and paperGrade !=''">
+        	PAPER_GRADE=#{paperGrade}
+			</if>
+        WHERE 
+	       PAPER_ID=#{paperId}
+    </update>
+       <update id="upPaperState"  parameterType="map" >
+    	 UPDATE p_paper_tab SET
+			<if test="paperStater !=null and paperStater !=''">
+        	PAPER_STATER=#{paperStater}
+			</if>
+        WHERE 
+	       PAPER_ID=#{paperId}
+    </update>
+    <delete id="deltePager" parameterType="int">
+    <![CDATA[
+        DELETE FROM p_paper_tab WHERE
+        PAPER_ID = #{id} 
+    ]]>
+    </delete>
+    
+    <select id="getChapPager" parameterType="int" resultMap="paperTab">
+		SELECT *
+	    <![CDATA[
+		    FROM p_paper_tab 
+	        WHERE 
+		        CHAPTER_ID = #{id} 
+	    ]]>
+	</select>
+	
+	<select id="getPageCount" parameterType="map" resultType="int">
+			SELECT count(*)
+	    <![CDATA[
+		    FROM p_paper_tab 
+	    ]]>
+	    <where>	      				
+	       	<if test="paper.paperId!=null and paper.paperId !='' ">
+        	AND PAPER_ID=#{paper.paperId}	
+			</if>
+			<if test="paper.paperDesc !=null and paper.paperDesc !=''">
+        	AND PAPER_DESC=#{paper.paperDesc} 
+			</if>
+			<if test="paper.overTime!=null and paper.overTime !=''">
+        	AND OVER_TIME=#{paper.overTime}	
+			</if>
+			<if test="paper.startTime!=null and paper.startTime !=''">
+        	AND START_TIME=#{paper.startTime}	
+			</if>
+			<if test="paper.paperCode!=null and paper.paperCode !=''">
+        	AND PAPER_CODE=#{paper.paperCode}	
+			</if>
+			<if test="paper.paperName!=null and paper.paperName !=''">
+        	AND PAPER_NAME=#{paper.paperName}	
+			</if>
+			<if test="paper.postId!=null and paper.postId !=''">
+        	AND POST_ID=#{paper.postId}	
+			</if>
+			<if test="paper.paperImgUrl!=null and paper.paperImgUrl !=''">
+        	AND PAPER_IMG_URL=#{paper.paperImgUrl} 	
+			</if>
+			<if test="paper.paperLevel !=null and paper.paperLevel !=''">
+        	AND PAPER_LEVEL=#{paper.paperLevel}	
+			</if>
+			<if test="paper.officeName !=null and paper.officeName !=''">
+        	AND OFFICE_NAME=#{paper.officeName} 	
+			</if>
+			<if test="paper.paperMaker !=null and paper.paperMaker !=''">
+        	AND PAPER_MAKER=#{paper.paperMaker}	
+			</if>
+			<if test="paper.makerPhone !=null and paper.makerPhone !=''">
+        	AND MAKER_PHONE=#{paper.makerPhone}	
+			</if>
+			<if test="paper.paperStater !=null and paper.paperStater !=''">
+        	AND PAPER_STATER in('已审核','审核中')	
+			</if>
+        	 <if test="paper.trainerUserId !=null and paper.trainerUserId !=''">
+			AND TRAINER_USERID=#{paper.trainerUserId}
+			</if>
+		</where>
+	</select>
+	<select id="getPageChapPager1" parameterType="map" resultMap="paperTab">
+		<include refid="pageS" />
+		SELECT *
+	    <![CDATA[
+		    FROM p_paper_tab 
+	    ]]>
+	    <where>	      				
+	       	<if test="paper.paperId!=null and paper.paperId !='' ">
+        	AND PAPER_ID=#{paper.paperId}	
+			</if>
+			<if test="paper.paperDesc !=null and paper.paperDesc !=''">
+        	AND PAPER_DESC=#{paper.paperDesc} 
+			</if>
+			<if test="paper.overTime!=null and paper.overTime !=''">
+        	AND OVER_TIME=#{paper.overTime}	
+			</if>
+			<if test="paper.startTime!=null and paper.startTime !=''">
+        	AND START_TIME=#{paper.startTime}	
+			</if>
+			<if test="paper.paperCode!=null and paper.paperCode !=''">
+        	AND PAPER_CODE=#{paper.paperCode}	
+			</if>
+			<if test="paper.paperName!=null and paper.paperName !=''">
+        	AND PAPER_NAME=#{paper.paperName}	
+			</if>
+			<if test="paper.postId!=null and paper.postId !=''">
+        	AND POST_ID=#{paper.postId}	
+			</if>
+			<if test="paper.paperImgUrl!=null and paper.paperImgUrl !=''">
+        	AND PAPER_IMG_URL=#{paper.paperImgUrl} 	
+			</if>
+			<if test="paper.paperLevel !=null and paper.paperLevel !=''">
+        	AND PAPER_LEVEL=#{paper.paperLevel}	
+			</if>
+			<if test="paper.officeName !=null and paper.officeName !=''">
+        	AND OFFICE_NAME=#{paper.officeName} 	
+			</if>
+			<if test="paper.paperMaker !=null and paper.paperMaker !=''">
+        	AND PAPER_MAKER=#{paper.paperMaker}	
+			</if>
+			<if test="paper.makerPhone !=null and paper.makerPhone !=''">
+        	AND MAKER_PHONE=#{paper.makerPhone}	
+			</if>
+			<if test="paper.paperStater !=null and paper.paperStater !=''">
+        	AND PAPER_STATER in('已审核','审核中')	
+			</if>
+        	 <if test="paper.trainerUserId !=null and paper.trainerUserId !=''">
+			AND TRAINER_USERID=#{paper.trainerUserId}
+			</if>
+			order by UP_DATE desc
+		</where>
+		<include refid="pageE" />
+	</select>
+	<select id="getIdPager" parameterType="String" resultMap="paperTab">
+			SELECT *
+	    <![CDATA[
+		    FROM p_paper_tab where PAPER_ID=#{paperId}
+	    ]]>
+	</select>
+	<select id="getPageChapPager" parameterType="map" resultMap="paperTab">
+		<include refid="pageS" />
+			SELECT *
+	    <![CDATA[
+		    FROM p_paper_tab 
+	    ]]>
+	    	<include refid="paperWhere" />
+	    	order by UP_DATE desc
+	 	<include refid="pageE" />
+	</select>
+	<sql id="paperWhere">
+		<where>	      				
+	       	<if test="paper.paperId!=null and paper.paperId !='' ">
+        	AND PAPER_ID=#{paper.paperId}	
+			</if>
+			<if test="paper.paperDesc !=null and paper.paperDesc !=''">
+        	AND PAPER_DESC=#{paper.paperDesc} 
+			</if>
+			<if test="paper.overTime!=null and paper.overTime !=''">
+        	AND OVER_TIME=#{paper.overTime}	
+			</if>
+			<if test="paper.startTime!=null and paper.startTime !=''">
+        	AND START_TIME=#{paper.startTime}	
+			</if>
+			<if test="paper.paperCode!=null and paper.paperCode !=''">
+        	AND PAPER_CODE=#{paper.paperCode}	
+			</if>
+			<if test="paper.paperName!=null and paper.paperName !=''">
+        	AND PAPER_NAME=#{paper.paperName}	
+			</if>
+			<if test="paper.postId!=null and paper.postId !=''">
+        	AND POST_ID=#{paper.postId}	
+			</if>
+			<if test="paper.paperImgUrl!=null and paper.paperImgUrl !=''">
+        	AND PAPER_IMG_URL=#{paper.paperImgUrl} 	
+			</if>
+			<if test="paper.paperLevel !=null and paper.paperLevel !=''">
+        	AND PAPER_LEVEL=#{paper.paperLevel}	
+			</if>
+			<if test="paper.officeName !=null and paper.officeName !=''">
+        	AND OFFICE_NAME=#{paper.officeName} 	
+			</if>
+			<if test="paper.paperMaker !=null and paper.paperMaker !=''">
+        	AND PAPER_MAKER=#{paper.paperMaker}	
+			</if>
+			<if test="paper.makerPhone !=null and paper.makerPhone !=''">
+        	AND MAKER_PHONE=#{paper.makerPhone}	
+			</if>
+			<if test="paper.paperStater !=null and paper.paperStater !=''">
+        	AND PAPER_STATER in('已审核','审核中')
+			</if>
+			<if test="paper.trainerUserId !=null and paper.trainerUserId !=''">
+			AND TRAINER_USERID=#{paper.trainerUserId}
+			</if>
+		</where>
+	</sql>
+	<delete id="delPaper" parameterType="string">
+	   delete from p_paper_tab where PAPER_ID=#{paperId}
+	</delete>
+	
+	<!-- 删除审核试卷 -->
+	<delete id="delPapers" parameterType="java.lang.String" >
+ 		delete from p_paper_tab WHERE PAPER_ID = #{_parameter}
+	</delete>
+	
+	<update id="pupdateJurisType" parameterType="map">
+ 	update p_paper_tab set PJURIS_TYPE=#{pjurisType,jdbcType=VARCHAR} where PAPER_ID = #{paperId,jdbcType=VARCHAR} 
+    </update>
+</mapper>
+

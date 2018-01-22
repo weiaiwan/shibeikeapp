@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<!-- 不使用namespace的话sql搜索定位会比较方便 -->
+<mapper namespace="main.java.com.gbicc.shibeikeapp.dao.ChapterTypeDao">
+<cache></cache>
+	<resultMap id="chapterType" type="ChapterType">
+		<id property="typeId" column="TYPE_ID" />
+		<result property="typeName" column="TYPE_NAME"/>
+		<result property="typeColumn" column="TYPE_COLUMN"/>
+	</resultMap>
+	<select id="chapterTypeByID"  parameterType="String" resultMap="chapterType">
+		select * from sys_chapter_type where type_column=#{Column}
+	</select>
+	<!-- 查询课程类别 -->
+	 <select id="getAllChapType" resultMap="chapterType" parameterType="String">
+		select * from sys_chapter_type 
+		where TYPE_COLUMN='course'
+		<if test="_parameter != null and _parameter != '' ">
+			and TYPE_NAME like #{_parameter}
+		</if>
+	</select> 
+	<!-- 课程类别插入 -->
+	<insert id="addChapType" parameterType="ChapterType">
+		insert into sys_chapter_type(TYPE_COLUMN,TYPE_ID,TYPE_NAME) values (#{typeColumn},#{typeId},#{typeName})
+	</insert>
+	<!-- 课程类别修改-->
+	<update id="updateChapType" parameterType="ChapterType">
+		UPDATE sys_chapter_type SET TYPE_NAME = #{typeName} where TYPE_ID = #{typeId}
+	</update>
+	<select id="findTypeId" parameterType="String" resultMap="chapterType">
+		select * from sys_chapter_type where TYPE_ID = #{typeId}
+	</select>
+	<!-- 课程类别插入删除 -->
+	<delete id="deleteChapType" parameterType="String">
+		 DELETE FROM sys_chapter_type WHERE TYPE_ID = #{typeId} 
+	</delete>
+	</mapper>
